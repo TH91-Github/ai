@@ -9,6 +9,7 @@ export type PromptField = {
   id: string
   label: string
   type: PromptFieldType
+  defaultValue?: PromptFormValue
   placeholder?: string
   helperText?: string
   options?: PromptFieldOption[]

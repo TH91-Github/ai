@@ -6,7 +6,7 @@ import TemplateSelector from '../components/TemplateSelector'
 import { categories } from '../data/categories'
 import { templates } from '../data/templates'
 import { copyToClipboard } from '../lib/clipboard'
-import { buildPrompt, createInitialValues } from '../lib/prompt'
+import { buildPrompt, createInitialValues, fillEmptyValuesWithDefaults } from '../lib/prompt'
 import type { PromptFormValue, PromptFormValues, PromptTemplate } from '../types/prompt'
 
 const getTemplatesByCategory = (categoryId: string) =>
@@ -82,6 +82,12 @@ function HomePage() {
   }
 
   const handleComplete = () => {
+    if (selectedTemplate) {
+      setFormValues((currentValues) =>
+        fillEmptyValuesWithDefaults(selectedTemplate.fields, currentValues),
+      )
+    }
+
     const previewElement = document.getElementById('prompt-preview-panel')
     previewElement?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }

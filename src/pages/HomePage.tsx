@@ -38,6 +38,8 @@ function HomePage() {
     [formValues, selectedTemplate],
   )
 
+  const isPromptReady = generatedPrompt.length > 0
+
   const handleCategorySelect = (categoryId: string) => {
     const nextTemplates = getTemplatesByCategory(categoryId)
     const nextTemplate = nextTemplates[0] ?? null
@@ -79,26 +81,31 @@ function HomePage() {
     }
   }
 
+  const handleComplete = () => {
+    const previewElement = document.getElementById('prompt-preview-panel')
+    previewElement?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.18),_transparent_28%),linear-gradient(180deg,_#fffdf7_0%,_#f8fafc_48%,_#eef2ff_100%)] px-4 py-8 text-slate-900 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.18),_transparent_28%),linear-gradient(180deg,_#fffdf7_0%,_#f8fafc_48%,_#eef2ff_100%)] px-4 py-5 text-slate-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <section className="mb-8 rounded-[32px] border border-white/80 bg-white/75 p-6 shadow-xl shadow-slate-200/50 backdrop-blur md:p-8">
-          <div className="max-w-3xl">
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-600">
+        <section className="mb-5 rounded-[28px] border border-white/80 bg-white/75 p-4 shadow-xl shadow-slate-200/50 backdrop-blur md:p-5">
+          <div className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
               Prompt Draft Builder
             </p>
-            <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-950 md:text-5xl">
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
               AI에 넣기 전, 먼저 검수 가능한 한글 프롬프트 초안을 만듭니다.
             </h1>
-            <p className="mt-4 text-base leading-7 text-slate-600 md:text-lg">
+            <p className="mt-2 text-sm leading-6 text-slate-600 md:text-base">
               이 앱은 AI 답변을 직접 생성하지 않고, 로컬 템플릿 데이터로 1차 프롬프트를 정리해주는 MVP입니다.
               카테고리와 템플릿을 고른 뒤 입력만 하면 바로 복사 가능한 초안이 생성됩니다.
             </p>
           </div>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
-          <div className="space-y-6 rounded-[32px] border border-slate-200 bg-white/85 p-5 shadow-lg shadow-slate-200/50 backdrop-blur md:p-6">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
+          <div className="space-y-5 rounded-[30px] border border-slate-200 bg-white/85 p-4 shadow-lg shadow-slate-200/50 backdrop-blur md:p-5">
             <CategorySelector
               categories={categories}
               selectedCategoryId={selectedCategoryId}
@@ -116,11 +123,13 @@ function HomePage() {
                 fields={selectedTemplate.fields}
                 values={formValues}
                 onChange={handleValueChange}
+                onComplete={handleComplete}
+                isReady={isPromptReady}
               />
             ) : null}
           </div>
 
-          <div className="min-h-[640px]">
+          <div id="prompt-preview-panel" className="min-h-[560px]">
             <PromptPreview
               categoryName={
                 categories.find((category) => category.id === selectedCategoryId)?.name ?? ''

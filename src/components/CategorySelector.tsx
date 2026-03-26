@@ -11,6 +11,9 @@ function CategorySelector({
   selectedCategoryId,
   onSelect,
 }: CategorySelectorProps) {
+  const selectedCategory =
+    categories.find((category) => category.id === selectedCategoryId) ?? categories[0]
+
   return (
     <section className="space-y-3">
       <div>
@@ -20,34 +23,25 @@ function CategorySelector({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        {categories.map((category) => {
-          const isActive = category.id === selectedCategoryId
+      <div className="space-y-2">
+        <select
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+          value={selectedCategoryId}
+          onChange={(event) => onSelect(event.target.value)}
+        >
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
 
-          return (
-            <button
-              key={category.id}
-              type="button"
-              onClick={() => onSelect(category.id)}
-              className={[
-                'rounded-2xl border px-4 py-3 text-left transition',
-                isActive
-                  ? 'border-slate-900 bg-slate-900 text-white shadow-lg shadow-slate-900/10'
-                  : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50',
-              ].join(' ')}
-            >
-              <p className="text-sm font-semibold">{category.name}</p>
-              <p
-                className={[
-                  'mt-1 text-xs leading-5',
-                  isActive ? 'text-slate-200' : 'text-slate-500',
-                ].join(' ')}
-              >
-                {category.description}
-              </p>
-            </button>
-          )
-        })}
+        <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3">
+          <p className="text-sm font-medium text-slate-800">{selectedCategory.name}</p>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            {selectedCategory.description}
+          </p>
+        </div>
       </div>
     </section>
   )

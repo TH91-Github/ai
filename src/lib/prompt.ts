@@ -10,7 +10,17 @@ const normalizeValue = (value: PromptFormValue | undefined) => {
 
 export const createInitialValues = (fields: PromptField[]): PromptFormValues =>
   fields.reduce<PromptFormValues>((accumulator, field) => {
-    accumulator[field.id] = field.type === 'tags' ? [] : ''
+    if (field.type === 'tags') {
+      accumulator[field.id] = []
+      return accumulator
+    }
+
+    if (field.type === 'select') {
+      accumulator[field.id] = field.options?.[0]?.value ?? ''
+      return accumulator
+    }
+
+    accumulator[field.id] = ''
     return accumulator
   }, {})
 

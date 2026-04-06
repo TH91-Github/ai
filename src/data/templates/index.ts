@@ -1,22 +1,18 @@
 import type { PromptTemplate } from '../../types/prompt'
-import { audioTemplates } from './audio'
-import { blogTemplates } from './blog'
 import { developmentTemplates } from './development'
+import { healthTemplates } from './health'
 import { historyTemplates } from './history'
-import { ideaTemplates } from './ideas'
-import { lifeTemplates } from './life'
-import { marketTemplates } from './market'
-import { newsTemplates } from './news'
-import { videoTemplates } from './video'
+import { recipeTemplates } from './recipe'
+import { stockTemplates } from './stock'
+import { winterSafetyTemplates } from './winterSafety'
+import { worldNewsTemplates } from './worldNews'
 
 export const templates: PromptTemplate[] = [
   ...developmentTemplates,
-  ...blogTemplates,
+  ...stockTemplates,
+  ...worldNewsTemplates,
+  ...healthTemplates,
+  ...winterSafetyTemplates,
   ...historyTemplates,
-  ...marketTemplates,
-  ...newsTemplates,
-  ...lifeTemplates,
-  ...ideaTemplates,
-  ...videoTemplates,
-  ...audioTemplates,
+  ...recipeTemplates,
 ]

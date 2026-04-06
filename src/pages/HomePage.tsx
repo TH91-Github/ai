@@ -2,11 +2,15 @@ import { useMemo, useState } from 'react'
 import CategorySelector from '../components/CategorySelector'
 import PromptForm from '../components/PromptForm'
 import PromptPreview from '../components/PromptPreview'
-import TemplateSelector from '../components/TemplateSelector'
 import { categories } from '../data/categories'
 import { templates } from '../data/templates'
 import { copyToClipboard } from '../lib/clipboard'
-import { buildPrompt, createInitialValues, fillEmptyValuesWithDefaults } from '../lib/prompt'
+import {
+  buildPrompt,
+  createInitialValues,
+  fillEmptyValuesWithDefaults,
+  hasRequiredValues,
+} from '../lib/prompt'
 import type { PromptFormValue, PromptFormValues, PromptTemplate } from '../types/prompt'
 
 const getTemplatesByCategory = (categoryId: string) =>
@@ -17,28 +21,19 @@ const getTemplateById = (templateId: string) =>
 
 function HomePage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(categories[0].id)
-  const [selectedTemplateId, setSelectedTemplateId] = useState(
-    getTemplatesByCategory(categories[0].id)[0]?.id ?? '',
-  )
+  const [selectedTemplateId, setSelectedTemplateId] = useState(getTemplatesByCategory(categories[0].id)[0]?.id ?? '')
   const [formValues, setFormValues] = useState<PromptFormValues>({})
+  const [generatedPrompt, setGeneratedPrompt] = useState('')
   const [copied, setCopied] = useState(false)
-
-  const categoryTemplates = useMemo(
-    () => getTemplatesByCategory(selectedCategoryId),
-    [selectedCategoryId],
-  )
 
   const selectedTemplate: PromptTemplate | null = useMemo(
     () => getTemplateById(selectedTemplateId),
     [selectedTemplateId],
   )
-
-  const generatedPrompt = useMemo(
-    () => buildPrompt(selectedTemplate, formValues),
+  const isPromptReady = useMemo(
+    () => (selectedTemplate ? hasRequiredValues(selectedTemplate.fields, formValues) : false),
     [formValues, selectedTemplate],
   )
-
-  const isPromptReady = generatedPrompt.length > 0
 
   const handleCategorySelect = (categoryId: string) => {
     const nextTemplates = getTemplatesByCategory(categoryId)
@@ -47,6 +42,7 @@ function HomePage() {
     setSelectedCategoryId(categoryId)
     setSelectedTemplateId(nextTemplate?.id ?? '')
     setFormValues(nextTemplate ? createInitialValues(nextTemplate.fields) : {})
+    setGeneratedPrompt('')
     setCopied(false)
   }
 
@@ -55,14 +51,7 @@ function HomePage() {
       ...currentValues,
       [fieldId]: value,
     }))
-    setCopied(false)
-  }
-
-  const handleTemplateSelect = (templateId: string) => {
-    const nextTemplate = getTemplateById(templateId)
-
-    setSelectedTemplateId(templateId)
-    setFormValues(nextTemplate ? createInitialValues(nextTemplate.fields) : {})
+    setGeneratedPrompt('')
     setCopied(false)
   }
 
@@ -82,46 +71,51 @@ function HomePage() {
   }
 
   const handleComplete = () => {
-    if (selectedTemplate) {
-      setFormValues((currentValues) =>
-        fillEmptyValuesWithDefaults(selectedTemplate.fields, currentValues),
-      )
+    if (!selectedTemplate) {
+      return
     }
+
+    const nextValues = fillEmptyValuesWithDefaults(selectedTemplate.fields, formValues)
+    setFormValues(nextValues)
+    setGeneratedPrompt(buildPrompt(selectedTemplate, nextValues))
 
     const previewElement = document.getElementById('prompt-preview-panel')
     previewElement?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const handleReset = () => {
+    if (!selectedTemplate) {
+      return
+    }
+
+    setFormValues(createInitialValues(selectedTemplate.fields))
+    setGeneratedPrompt('')
+    setCopied(false)
+  }
+
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.18),_transparent_28%),linear-gradient(180deg,_#fffdf7_0%,_#f8fafc_48%,_#eef2ff_100%)] px-4 py-5 text-slate-900 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <section className="mb-5 rounded-[28px] border border-white/80 bg-white/75 p-4 shadow-xl shadow-slate-200/50 backdrop-blur md:p-5">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.12),_transparent_24%),linear-gradient(180deg,_#fffdf8_0%,_#f8fafc_52%,_#f1f5f9_100%)] px-4 py-4 text-slate-900 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl">
+        <section className="mb-4 rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
           <div className="max-w-2xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-600">
               Prompt Draft Builder
             </p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
-              AI에 넣기 전, 먼저 검수 가능한 한글 프롬프트 초안을 만듭니다.
+            <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-950 md:text-2xl">
+              카테고리에 맞는 블로그 프롬프트를 빠르게 만듭니다.
             </h1>
-            <p className="mt-2 text-sm leading-6 text-slate-600 md:text-base">
-              이 앱은 AI 답변을 직접 생성하지 않고, 로컬 템플릿 데이터로 1차 프롬프트를 정리해주는 MVP입니다.
-              카테고리와 템플릿을 고른 뒤 입력만 하면 바로 복사 가능한 초안이 생성됩니다.
+            <p className="mt-1.5 text-sm leading-6 text-slate-600">
+              카테고리를 고르면 주제에 맞는 입력 항목으로 폼이 바뀌고, 완료를 누르면 다른 AI에 바로 붙여넣을 수 있는 한국어 프롬프트 초안이 생성됩니다.
             </p>
           </div>
         </section>
 
-        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.9fr)]">
-          <div className="space-y-5 rounded-[30px] border border-slate-200 bg-white/85 p-4 shadow-lg shadow-slate-200/50 backdrop-blur md:p-5">
+        <section className="space-y-4">
+          <div className="space-y-4 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
             <CategorySelector
               categories={categories}
               selectedCategoryId={selectedCategoryId}
               onSelect={handleCategorySelect}
-            />
-
-            <TemplateSelector
-              templates={categoryTemplates}
-              selectedTemplateId={selectedTemplateId}
-              onSelect={handleTemplateSelect}
             />
 
             {selectedTemplate ? (
@@ -135,15 +129,15 @@ function HomePage() {
             ) : null}
           </div>
 
-          <div id="prompt-preview-panel" className="min-h-[560px]">
+          <div id="prompt-preview-panel">
             <PromptPreview
               categoryName={
                 categories.find((category) => category.id === selectedCategoryId)?.name ?? ''
               }
-              templateName={selectedTemplate?.name ?? '선택된 템플릿 없음'}
               prompt={generatedPrompt}
               copied={copied}
               onCopy={handleCopy}
+              onReset={handleReset}
             />
           </div>
         </section>

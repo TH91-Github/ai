@@ -86,3 +86,11 @@ export const buildPrompt = (
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 }
+
+export const hasRequiredValues = (
+  fields: PromptField[],
+  values: PromptFormValues,
+) =>
+  fields
+    .filter((field) => field.required)
+    .every((field) => !isEmptyValue(values[field.id]))

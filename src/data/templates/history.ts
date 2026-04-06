@@ -2,71 +2,101 @@ import type { PromptTemplate } from '../../types/prompt'
 
 export const historyTemplates: PromptTemplate[] = [
   {
-    id: 'history-explainer',
+    id: 'history-master',
     categoryId: 'history',
-    name: '역사/시사 설명글',
-    description: '사건 배경과 흐름, 의미를 쉽게 설명하는 정보형 글용 템플릿입니다.',
+    name: '역사 설명형 정보글',
+    description: '사건의 배경과 흐름, 의미를 쉽게 풀어쓰는 역사 정보글 프롬프트입니다.',
     fields: [
-      {
-        id: 'topic',
-        label: '주제',
-        type: 'text',
-        placeholder: '예: 프랑스 혁명이 왜 일어났는가 / 냉전의 배경',
-      },
-      {
-        id: 'keywords',
-        label: '키워드',
-        type: 'tags',
-        placeholder: '예: 배경, 원인, 전개, 영향, 의미',
-      },
+      { id: 'topic', label: '주제', type: 'text', required: true, placeholder: '예: 프랑스 혁명은 왜 일어났을까?' },
       {
         id: 'summary',
         label: '설명',
         type: 'textarea',
-        placeholder: '어떤 맥락으로 설명하고 싶은지 적어주세요.',
-      },
-      {
-        id: 'goal',
-        label: '목적',
-        type: 'text',
-        placeholder: '예: 초보자도 이해하기 쉬운 배경 설명 글',
+        defaultValue: '배경과 흐름, 의미를 초보자도 이해하기 쉽게 정리',
       },
       {
         id: 'length',
         label: '분량',
         type: 'text',
-        placeholder: '예: 1,500자 내외',
+        defaultValue: '소제목 포함 완성형 글 1,100~1,400자 내외',
+      },
+      {
+        id: 'imagePolicy',
+        label: '이미지 사용 여부',
+        type: 'select',
+        defaultValue: '필요할 때만 이미지 사용',
+        options: [
+          { label: '필요할 때만 사용', value: '필요할 때만 이미지 사용' },
+          { label: '이미지 없이 진행', value: '이미지 없이 텍스트 중심으로 작성' },
+        ],
       },
       {
         id: 'include',
-        label: '필수 포함 요소',
-        type: 'tags',
-        placeholder: '예: 사건 배경, 핵심 흐름, 의미, 영향',
+        label: '필수 포함 내용',
+        type: 'text',
+        defaultValue: '사건 소개, 배경, 핵심 흐름, 의미와 영향',
       },
       {
         id: 'exclude',
         label: '피해야 할 표현',
-        type: 'tags',
-        placeholder: '예: 단순 연도 나열, 과장, 확인 안 된 해석',
+        type: 'text',
+        defaultValue: '단순 연도 나열, 과장, 확인되지 않은 해석',
+      },
+      {
+        id: 'era',
+        label: '시대',
+        type: 'text',
+        defaultValue: '관련 시대 배경을 함께 설명',
+        placeholder: '예: 근대 유럽',
+      },
+      {
+        id: 'region',
+        label: '지역',
+        type: 'text',
+        defaultValue: '사건이 발생한 주요 지역 중심',
+        placeholder: '예: 프랑스, 유럽',
+      },
+      {
+        id: 'backgroundNeeded',
+        label: '사건 배경 설명 여부',
+        type: 'select',
+        defaultValue: '포함',
+        options: [
+          { label: '포함', value: '포함' },
+          { label: '간단히만', value: '간단히만' },
+        ],
       },
     ],
-    resultFormat: `당신은 한국어 정보형 블로그 전문 콘텐츠 에디터다.
+    resultFormat: `당신은 한국어 정보형 블로그 전문 에디터이자 리서처입니다.
 
-아래 주제로 역사/시사 설명형 블로그 글 작성용 프롬프트를 만들어줘.
+아래 정보를 바탕으로 티스토리에 바로 복붙 가능한 역사 설명형 정보글을 작성해주세요.
 
 주제: {{topic}}
-핵심 키워드: {{keywords}}
-기본 설명: {{summary}}
-작성 목적: {{goal}}
+설명: {{summary}}
 원하는 분량: {{length}}
-필수 포함 요소: {{include}}
+이미지 사용 여부: {{imagePolicy}}
+필수 포함 내용: {{include}}
 피해야 할 표현: {{exclude}}
+시대: {{era}}
+지역: {{region}}
+사건 배경 설명 여부: {{backgroundNeeded}}
 
-작성 원칙:
-- 사건 소개 → 배경 → 핵심 흐름 → 의미/영향 순으로 설명할 것
-- 단순 연도 나열보다 맥락 중심으로 정리할 것
-- 초보자도 이해할 수 있게 쉽게 설명할 것
-- 불확실한 해석은 사실처럼 단정하지 말 것
-- 제목 후보, 핵심 키워드, 검색 의도, 소제목 구조, 본문, 메타 설명, 태그를 함께 정리할 것`,
+작성 기준:
+- 사건 소개 → 배경 → 핵심 흐름 → 의미/영향 순으로 작성할 것
+- 단순 연도 나열보다 맥락을 중심으로 설명할 것
+- 독자가 왜 중요한지 이해할 수 있게 정리할 것
+- 이미지가 필요하면 실제 사진, 지도, 도표 위주로 2~3개만 제안할 것
+
+출력 형식:
+1. 제목 후보 5개
+2. 최종 추천 제목 1개
+3. 메타 설명 1개
+4. 도입부
+5. 본문 (소제목 포함 완성형)
+6. 필요 시 이미지 추천 위치
+7. 마무리
+8. FAQ 2~3개
+9. 해시태그 10개
+10. 함께 쓰기 좋은 연관 글 주제 3개`,
   },
 ]

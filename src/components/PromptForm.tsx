@@ -14,19 +14,29 @@ function PromptForm({ fields, values, onChange, onComplete, isReady }: PromptFor
       <div>
         <p className="text-sm font-semibold text-slate-900">입력 폼</p>
         <p className="mt-1 text-sm text-slate-500">
-          값은 실시간으로 우측 초안 프롬프트에 반영됩니다.
+          카테고리에 맞는 항목만 입력하면 완료 시 하단에 최종 프롬프트 초안이 생성됩니다.
         </p>
       </div>
 
-      <div className="space-y-3">
+      <div className="grid gap-3 md:grid-cols-2">
         {fields.map((field) => {
           const value = values[field.id]
           const baseClassName =
             'w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-400'
+          const isWide = field.type === 'textarea'
 
           return (
-            <label key={field.id} className="block space-y-1.5">
-              <span className="text-sm font-medium text-slate-700">{field.label}</span>
+            <label
+              key={field.id}
+              className={[
+                'block space-y-1.5',
+                isWide ? 'md:col-span-2' : '',
+              ].join(' ')}
+            >
+              <span className="text-sm font-medium text-slate-700">
+                {field.label}
+                {field.required ? <span className="ml-1 text-rose-500">*</span> : null}
+              </span>
 
               {field.type === 'textarea' ? (
                 <textarea
@@ -84,7 +94,7 @@ function PromptForm({ fields, values, onChange, onComplete, isReady }: PromptFor
         })}
       </div>
 
-      <div className="sticky bottom-0 pt-2">
+      <div className="pt-2">
         <button
           type="button"
           onClick={onComplete}

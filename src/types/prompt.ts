@@ -10,6 +10,7 @@ export type PromptField = {
   label: string
   type: PromptFieldType
   defaultValue?: PromptFormValue
+  required?: boolean
   placeholder?: string
   helperText?: string
   options?: PromptFieldOption[]

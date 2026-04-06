@@ -1,9 +1,11 @@
 import { useMemo, useState } from 'react'
 import CategorySelector from '../components/CategorySelector'
+import ExistingPostHints from '../components/ExistingPostHints'
 import PromptForm from '../components/PromptForm'
 import PromptPreview from '../components/PromptPreview'
 import { categories } from '../data/categories'
 import { templates } from '../data/templates'
+import { findSimilarPosts } from '../lib/blogPosts'
 import { copyToClipboard } from '../lib/clipboard'
 import {
   buildPrompt,
@@ -11,6 +13,7 @@ import {
   fillEmptyValuesWithDefaults,
   hasRequiredValues,
 } from '../lib/prompt'
+import type { BlogPostRecord } from '../types/blogPost'
 import type { PromptFormValue, PromptFormValues, PromptTemplate } from '../types/prompt'
 
 const getTemplatesByCategory = (categoryId: string) =>
@@ -19,10 +22,17 @@ const getTemplatesByCategory = (categoryId: string) =>
 const getTemplateById = (templateId: string) =>
   templates.find((template) => template.id === templateId) ?? null
 
-function HomePage() {
+type HomePageProps = {
+  posts: BlogPostRecord[]
+}
+
+function HomePage({ posts }: HomePageProps) {
+  const initialTemplate = getTemplatesByCategory(categories[0].id)[0] ?? null
   const [selectedCategoryId, setSelectedCategoryId] = useState(categories[0].id)
-  const [selectedTemplateId, setSelectedTemplateId] = useState(getTemplatesByCategory(categories[0].id)[0]?.id ?? '')
-  const [formValues, setFormValues] = useState<PromptFormValues>({})
+  const [selectedTemplateId, setSelectedTemplateId] = useState(initialTemplate?.id ?? '')
+  const [formValues, setFormValues] = useState<PromptFormValues>(
+    initialTemplate ? createInitialValues(initialTemplate.fields) : {},
+  )
   const [generatedPrompt, setGeneratedPrompt] = useState('')
   const [copied, setCopied] = useState(false)
 
@@ -34,6 +44,15 @@ function HomePage() {
     () => (selectedTemplate ? hasRequiredValues(selectedTemplate.fields, formValues) : false),
     [formValues, selectedTemplate],
   )
+  const similarPosts = useMemo(() => {
+    const topicValue = formValues.topic
+
+    if (typeof topicValue !== 'string') {
+      return []
+    }
+
+    return findSimilarPosts(posts, topicValue)
+  }, [formValues.topic, posts])
 
   const handleCategorySelect = (categoryId: string) => {
     const nextTemplates = getTemplatesByCategory(categoryId)
@@ -94,54 +113,49 @@ function HomePage() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(251,191,36,0.12),_transparent_24%),linear-gradient(180deg,_#fffdf8_0%,_#f8fafc_52%,_#f1f5f9_100%)] px-4 py-4 text-slate-900 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-5xl">
-        <section className="mb-4 rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
-          <div className="max-w-2xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-600">
-              Prompt Draft Builder
-            </p>
-            <h1 className="mt-1.5 text-xl font-semibold tracking-tight text-slate-950 md:text-2xl">
-              카테고리에 맞는 블로그 프롬프트를 빠르게 만듭니다.
-            </h1>
-            <p className="mt-1.5 text-sm leading-6 text-slate-600">
-              카테고리를 고르면 주제에 맞는 입력 항목으로 폼이 바뀌고, 완료를 누르면 다른 AI에 바로 붙여넣을 수 있는 한국어 프롬프트 초안이 생성됩니다.
-            </p>
-          </div>
-        </section>
+    <main className="space-y-4 text-slate-900">
+      <section className="rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
+        <div className="max-w-2xl">
+          <p className="text-sm font-semibold text-slate-900">초안 작성</p>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            카테고리를 고르면 주제에 맞는 입력 항목으로 폼이 바뀌고, 완료를 누르면 다른 AI에 바로 붙여넣을 수 있는 한국어 프롬프트 초안이 생성됩니다.
+          </p>
+        </div>
+      </section>
 
-        <section className="space-y-4">
-          <div className="space-y-4 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
-            <CategorySelector
-              categories={categories}
-              selectedCategoryId={selectedCategoryId}
-              onSelect={handleCategorySelect}
+      <section className="space-y-4">
+        <div className="space-y-4 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
+          <CategorySelector
+            categories={categories}
+            selectedCategoryId={selectedCategoryId}
+            onSelect={handleCategorySelect}
+          />
+
+          <ExistingPostHints posts={similarPosts} />
+
+          {selectedTemplate ? (
+            <PromptForm
+              fields={selectedTemplate.fields}
+              values={formValues}
+              onChange={handleValueChange}
+              onComplete={handleComplete}
+              isReady={isPromptReady}
             />
+          ) : null}
+        </div>
 
-            {selectedTemplate ? (
-              <PromptForm
-                fields={selectedTemplate.fields}
-                values={formValues}
-                onChange={handleValueChange}
-                onComplete={handleComplete}
-                isReady={isPromptReady}
-              />
-            ) : null}
-          </div>
-
-          <div id="prompt-preview-panel">
-            <PromptPreview
-              categoryName={
-                categories.find((category) => category.id === selectedCategoryId)?.name ?? ''
-              }
-              prompt={generatedPrompt}
-              copied={copied}
-              onCopy={handleCopy}
-              onReset={handleReset}
-            />
-          </div>
-        </section>
-      </div>
+        <div id="prompt-preview-panel">
+          <PromptPreview
+            categoryName={
+              categories.find((category) => category.id === selectedCategoryId)?.name ?? ''
+            }
+            prompt={generatedPrompt}
+            copied={copied}
+            onCopy={handleCopy}
+            onReset={handleReset}
+          />
+        </div>
+      </section>
     </main>
   )
 }

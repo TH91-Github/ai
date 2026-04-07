@@ -67,7 +67,7 @@ function BlogLibraryPage({ posts, onAddPost }: BlogLibraryPageProps) {
 
   return (
     <main className="space-y-4 text-slate-900">
-      <section className="rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-200/40">
+      <section className="rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-[var(--soft-directional-shadow)]">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold text-slate-900">블로그 등록 관리</p>
           <p className="mt-1 text-sm leading-6 text-slate-500">
@@ -80,7 +80,7 @@ function BlogLibraryPage({ posts, onAddPost }: BlogLibraryPageProps) {
       <section className="grid gap-4 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <form
           onSubmit={handleSubmit}
-          className="space-y-3 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-200/40"
+          className="space-y-3 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-[var(--soft-directional-shadow)]"
         >
             <div>
               <p className="text-sm font-semibold text-slate-900">새 글 등록</p>
@@ -162,7 +162,7 @@ function BlogLibraryPage({ posts, onAddPost }: BlogLibraryPageProps) {
             </button>
         </form>
 
-        <section className="space-y-3 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-200/40">
+        <section className="space-y-3 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-[var(--soft-directional-shadow)]">
             <div>
               <p className="text-sm font-semibold text-slate-900">등록된 글 목록</p>
               <p className="mt-1 text-sm text-slate-500">

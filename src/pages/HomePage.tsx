@@ -114,7 +114,7 @@ function HomePage({ posts }: HomePageProps) {
 
   return (
     <main className="space-y-4 text-slate-900">
-      <section className="rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
+      <section className="rounded-[24px] border border-white/80 bg-white/80 p-4 shadow-[var(--soft-directional-shadow)] backdrop-blur">
         <div className="max-w-2xl">
           <p className="text-sm font-semibold text-slate-900">초안 작성</p>
           <p className="mt-1 text-sm leading-6 text-slate-600">
@@ -124,7 +124,7 @@ function HomePage({ posts }: HomePageProps) {
       </section>
 
       <section className="space-y-4">
-        <div className="space-y-4 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-lg shadow-slate-200/40 backdrop-blur">
+        <div className="space-y-4 rounded-[24px] border border-slate-200 bg-white/90 p-4 shadow-[var(--soft-directional-shadow)] backdrop-blur">
           <CategorySelector
             categories={categories}
             selectedCategoryId={selectedCategoryId}

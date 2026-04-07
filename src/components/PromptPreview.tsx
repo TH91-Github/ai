@@ -14,7 +14,7 @@ function PromptPreview({
   onReset,
 }: PromptPreviewProps) {
   return (
-    <section className="flex min-h-[360px] flex-col rounded-[24px] border border-slate-200 bg-slate-950 p-4 text-white shadow-2xl shadow-slate-950/10 md:p-5">
+    <section className="flex min-h-[360px] flex-col rounded-[24px] border border-slate-200 bg-slate-950 p-4 text-white shadow-[var(--soft-directional-shadow-strong)] md:p-5">
       <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-3">
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-slate-400">

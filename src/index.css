@@ -9,6 +9,8 @@
 :root {
   color: #0f172a;
   background-color: #f8fafc;
+  --soft-directional-shadow: 7px 9px 16px -14px rgba(15, 23, 42, 0.58);
+  --soft-directional-shadow-strong: 8px 10px 18px -15px rgba(15, 23, 42, 0.68);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

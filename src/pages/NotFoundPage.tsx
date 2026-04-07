@@ -25,7 +25,7 @@ function NotFoundPage({ onNavigateHome }: NotFoundPageProps) {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(248,113,113,0.16),_transparent_25%),linear-gradient(180deg,_#fffaf8_0%,_#f8fafc_100%)] px-4 py-10">
-      <section className="w-full max-w-xl rounded-[32px] border border-slate-200 bg-white/90 p-8 text-center shadow-2xl shadow-slate-200/70 backdrop-blur">
+      <section className="w-full max-w-xl rounded-[32px] border border-slate-200 bg-white/90 p-8 text-center shadow-[var(--soft-directional-shadow-strong)] backdrop-blur">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-rose-500">
           Invalid Path
         </p>

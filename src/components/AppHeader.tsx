@@ -10,7 +10,7 @@ const navigationItems = [
 
 function AppHeader({ pathname, onNavigate }: AppHeaderProps) {
   return (
-    <header className="mb-4 rounded-[22px] border border-white/80 bg-white/85 p-3 shadow-lg shadow-slate-200/40 backdrop-blur">
+    <header className="mb-4 rounded-[22px] border border-white/80 bg-white/85 p-3 shadow-[var(--soft-directional-shadow)] backdrop-blur">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-600">

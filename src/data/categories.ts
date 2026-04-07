@@ -22,6 +22,11 @@ export const categories: PromptCategory[] = [
     description: '재료, 과정, 팁을 읽기 쉽게 정리하는 레시피형 프롬프트',
   },
   {
+    id: 'history',
+    name: '역사',
+    description: '사실 기반 역사 이야기를 쉽고 재미있게 풀어주는 블로그 프롬프트',
+  },
+  {
     id: 'winter-safety',
     name: '기타',
     description: '정해진 분류에 맞지 않는 주제를 정보형 블로그 글로 정리하는 범용 프롬프트',

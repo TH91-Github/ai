@@ -17,6 +17,11 @@ export const categories: PromptCategory[] = [
     description: '시장 흐름, ETF, 종목 이슈를 신중하게 정리하는 정보형 프롬프트',
   },
   {
+    id: 'music',
+    name: '음악',
+    description: '장르, 분위기, 보컬, 구성, 사운드 요소를 정리하는 음악 제작 프롬프트',
+  },
+  {
     id: 'health',
     name: '건강',
     description: '통증, 증상, 원인, 생활 대처와 진료 기준을 안전하게 정리하는 건강 정보 프롬프트',

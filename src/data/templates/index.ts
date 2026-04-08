@@ -1,5 +1,6 @@
 import type { PromptTemplate } from '../../types/prompt'
 import { developmentTemplates } from './development'
+import { healthTemplates } from './health'
 import { historyTemplates } from './history'
 import { recipeTemplates } from './recipe'
 import { stockTemplates } from './stock'
@@ -10,6 +11,7 @@ export const templates: PromptTemplate[] = [
   ...developmentTemplates,
   ...worldNewsTemplates,
   ...stockTemplates,
+  ...healthTemplates,
   ...recipeTemplates,
   ...historyTemplates,
   ...winterSafetyTemplates,

@@ -79,6 +79,13 @@ export const recipeTemplates: PromptTemplate[] = [
           { label: '과정과 팁 중심', value: '과정과 팁 중심' },
         ],
       },
+      {
+        id: 'referenceLinks',
+        label: '참고 링크',
+        type: 'textarea',
+        placeholder: '예: 참고 레시피, 유튜브 요리 영상, 제품 페이지 URL을 줄바꿈으로 입력',
+        helperText: '입력한 링크가 있으면 재료와 조리 흐름을 참고하되 그대로 베끼지 않습니다.',
+      },
     ],
     resultFormat: `${blogHtmlOutputGuidelines}
 
@@ -94,10 +101,12 @@ export const recipeTemplates: PromptTemplate[] = [
 난이도: {{difficulty}}
 조리시간: {{cookTime}}
 재료/과정/팁 포함 여부: {{recipeFocus}}
+참고 링크: {{referenceLinks}}
 
 [카테고리별 생성 규칙: 음식 레시피]
 - 하나의 메뉴에 대해 1~3가지 스타일 레시피를 제공할 것
 - 공통 재료, 레시피별 조리 방법, 차이점 분석, 맛 보완 팁을 포함할 것
+- 참고 링크가 입력되어 있다면 재료, 조리 순서, 굽는 시간, 온도, 영상 흐름을 참고하되 문장을 그대로 복사하지 말고 블로그용으로 재구성할 것
 - 맛이 부족할 때 어떤 재료를 추가하면 좋은지 같은 실용 팁을 넣을 것
 - 실제 요리 블로그처럼 읽히는 흐름으로 구성할 것
 - 계량과 과정은 최대한 이해하기 쉽게 정리할 것

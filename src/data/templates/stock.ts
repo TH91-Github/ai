@@ -73,6 +73,13 @@ export const stockTemplates: PromptTemplate[] = [
           { label: '간단히', value: '간단히' },
         ],
       },
+      {
+        id: 'referenceLinks',
+        label: '참고 링크',
+        type: 'textarea',
+        placeholder: '예: 뉴스 기사, 증권사 리포트, ETF 페이지, 유튜브 링크를 줄바꿈으로 입력',
+        helperText: '입력한 링크가 있으면 시장 흐름과 리스크 판단에 참고합니다.',
+      },
     ],
     resultFormat: `${blogHtmlOutputGuidelines}
 
@@ -87,10 +94,13 @@ export const stockTemplates: PromptTemplate[] = [
 투자 성향 기준: {{riskProfile}}
 시장: {{marketType}}
 리스크 경고 포함 여부: {{riskWarning}}
+참고 링크: {{referenceLinks}}
 
 [카테고리별 생성 규칙: 주식 / 증권]
 - 시장 흐름 요약, 주요 지수, 투자 심리, 단기/중기 관점을 포함할 것
 - QQQ, SPY 등 주요 지수가 주제와 관련 있으면 자연스럽게 포함할 것
+- 참고 링크가 입력되어 있다면 뉴스 기사, 리포트, ETF/지수 페이지, 영상 내용을 우선 참고하되 투자 권유처럼 쓰지 말 것
+- 참고 링크가 여러 개라면 서로 충돌하는 내용은 단정하지 말고 확인 가능한 공통 사실과 시장 해석을 구분할 것
 - 필요 시 매수/대기/리스크 구간을 설명하되 투자 권유처럼 쓰지 말 것
 - 확정 표현, 과장, 선동적 표현을 피하고 신중한 정보형 문체로 작성할 것
 - 차트는 실제 이미지 대신 차트 설명과 이미지 프롬프트로 처리할 것

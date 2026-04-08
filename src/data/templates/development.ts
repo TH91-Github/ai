@@ -81,6 +81,13 @@ export const developmentTemplates: PromptTemplate[] = [
           { label: '생략', value: '생략' },
         ],
       },
+      {
+        id: 'referenceLinks',
+        label: '참고 링크',
+        type: 'textarea',
+        placeholder: '예: 공식 문서, GitHub, MDN, 블로그 URL을 줄바꿈으로 입력',
+        helperText: '입력한 링크가 있으면 개념과 예제를 판단하는 참고 자료로 활용합니다.',
+      },
     ],
     resultFormat: `${blogHtmlOutputGuidelines}
 
@@ -95,10 +102,13 @@ export const developmentTemplates: PromptTemplate[] = [
 대상 독자: {{audience}}
 사용 기술: {{techStack}}
 코드 예시 포함 여부: {{codeExample}}
+참고 링크: {{referenceLinks}}
 
 [카테고리별 생성 규칙: 개발]
 - 입력된 기술이나 개념에 대해 설명형 개발 블로그 글을 생성할 것
 - 개념 설명 → 사용 목적 → 간단한 사용 예시 → 코드 예제 → 주의사항 → 마무리 흐름으로 작성할 것
+- 참고 링크가 입력되어 있다면 공식 문서, MDN, GitHub, 기술 블로그 내용을 우선 참고하고, 오래된 API나 deprecated 문법은 신중하게 구분할 것
+- 참고 링크가 비어 있으면 일반적으로 안정적인 개발 지식과 최신성 확인이 필요한 영역을 구분해서 작성할 것
 - 코드 예제가 포함이면 주석을 넣고, 코드 블록은 가독성 있게 스타일링할 것
 - HTML은 블로그 설명과 코드 예제가 자연스럽게 이어지는 구조로 만들 것
 - 개발 글에서는 본문 이미지를 억지로 넣지 말고, 필요한 경우에만 이미지 프롬프트를 제공할 것

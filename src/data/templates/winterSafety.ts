@@ -68,6 +68,13 @@ export const winterSafetyTemplates: PromptTemplate[] = [
           { label: '짧고 담백하게', value: '짧고 담백하게' },
         ],
       },
+      {
+        id: 'referenceLinks',
+        label: '참고 링크',
+        type: 'textarea',
+        placeholder: '예: 관련 기사, 공식 안내, 서비스 페이지, 유튜브 링크를 줄바꿈으로 입력',
+        helperText: '입력한 링크가 있으면 주제 성격을 판단하는 참고 자료로 활용합니다.',
+      },
     ],
     resultFormat: `${blogHtmlOutputGuidelines}
 
@@ -81,10 +88,13 @@ export const winterSafetyTemplates: PromptTemplate[] = [
 피해야 할 표현: {{exclude}}
 주제 성격: {{contentType}}
 정리 방식: {{summaryStyle}}
+참고 링크: {{referenceLinks}}
 
 [카테고리별 생성 규칙: 기타 / 정보형]
 - 입력된 주제를 바탕으로 정보형 블로그를 작성할 것
 - 먼저 주제 성격을 파악한 뒤 설명 + 가이드 형태로 정리할 것
+- 참고 링크가 입력되어 있다면 공식 안내, 서비스 페이지, 기사, 영상 내용을 참고해서 주제 성격과 핵심 정보를 판단할 것
+- 참고 링크가 여러 개라면 서로 충돌하는 내용은 단정하지 말고 확인 가능한 공통 사실 중심으로 정리할 것
 - 실생활에 도움이 되는 구조를 우선할 것
 - 생활 정보, 서비스 소개, 비교/추천, 주의사항, 체크리스트형 주제 등으로 유연하게 구성할 것
 - 메타 설명, FAQ, 출처 목록은 만들지 말 것

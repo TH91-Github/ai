@@ -82,6 +82,13 @@ export const healthTemplates: PromptTemplate[] = [
           { label: '간단히 포함', value: '전문의 상담이 필요한 경우를 간단히 포함' },
         ],
       },
+      {
+        id: 'referenceLinks',
+        label: '참고 링크',
+        type: 'textarea',
+        placeholder: '예: 질병관리청, 병원 안내, 학회 자료, 의료기관 링크를 줄바꿈으로 입력',
+        helperText: '입력한 링크가 있으면 공신력 있는 의료 정보인지 우선 판단해 반영합니다.',
+      },
     ],
     resultFormat: `${blogHtmlOutputGuidelines}
 
@@ -97,6 +104,7 @@ export const healthTemplates: PromptTemplate[] = [
 입력 유형: {{inputType}}
 중심 증상: {{symptomFocus}}
 안전 안내: {{medicalSafety}}
+참고 링크: {{referenceLinks}}
 
 [카테고리별 생성 규칙: 건강]
 - 사용자가 입력한 단어가 중의적이면 의료 맥락으로 해석할 것. 예: "사마귀"는 곤충이 아니라 피부 사마귀로 해석
@@ -105,6 +113,8 @@ export const healthTemplates: PromptTemplate[] = [
 - 건강 정보는 실제 의료기관 진료를 대체하지 않는다는 취지를 자연스럽게 포함할 것
 - 가능한 경우 최신의 공신력 있는 의료 정보 기준으로 정리할 것
 - 우선 참고 기준은 질병관리청, 국가건강정보포털, 서울아산병원, 삼성서울병원, 서울대병원, 세브란스, 분당서울대병원, Mayo Clinic, NHS, Cleveland Clinic, MedlinePlus, NIH, 관련 대한의학회 정보로 둘 것
+- 참고 링크가 입력되어 있다면 공공기관, 병원, 학회, NIH/NHS/Mayo Clinic 등 공신력 있는 링크를 우선 반영하고, 블로그/커뮤니티 링크는 보조 참고로만 사용할 것
+- 참고 링크가 여러 개라면 서로 충돌하는 내용은 단정하지 말고 의료기관/공공기관 기준을 우선할 것
 - 블로그, 커뮤니티, 카페 정보는 핵심 근거로 쓰지 말고 사실 검증 보조 정도로만 볼 것
 - 약 이름, 치료법, 운동법은 일반적인 예시 수준으로만 언급하고 처방이나 실행을 단정적으로 지시하지 말 것
 - 검증되지 않은 민간요법, 과장된 완치 표현, 공포 조장 표현, 광고성 표현은 넣지 말 것

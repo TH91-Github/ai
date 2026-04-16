@@ -1,0 +1,6 @@
+// src/assets/styles/global.scss
+// 역할: 전역 스타일 진입점 — main.tsx에서 한 번만 임포트
+
+@use './utils/variables' as *;
+@use './utils/mixins' as *;
+@use './base/reset';

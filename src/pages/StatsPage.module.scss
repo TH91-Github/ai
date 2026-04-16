@@ -1,0 +1,252 @@
+// src/pages/StatsPage.module.scss
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.pageHeader {
+  margin-bottom: 0;
+}
+
+.pageTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.pageDesc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+// ── 요약 카드 ──
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.summaryCard {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.summaryIcon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.summaryLabel {
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.summaryValue {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.03em;
+  line-height: 1;
+
+  span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-left: 0.2rem;
+  }
+}
+
+// ── 섹션 그리드 ──
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+}
+
+.sectionTitle {
+  margin: 0 0 1rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+// ── 바 차트 ──
+.barList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.barItem {
+  display: grid;
+  grid-template-columns: 80px 1fr 28px;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.barLabel {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.barTrack {
+  height: 10px;
+  background: var(--color-surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+
+.barCount {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+// ── 타입별 ──
+.typeList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.typeItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-surface-2);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+// ── 최근 등록 ──
+.recentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.recentItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.recentMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.recentDate {
+  font-size: 0.72rem;
+  color: var(--color-text-disabled);
+}
+
+.recentTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+
+  a {
+    color: var(--color-primary);
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+// ── 키워드 클라우드 ──
+.keywordCloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+
+.keywordItem {
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  cursor: default;
+  transition: opacity 0.15s;
+
+  &:hover { opacity: 1 !important; }
+}
+
+.keywordCount {
+  font-size: 0.62rem;
+  font-weight: 400;
+  color: var(--color-text-disabled);
+  margin-left: 0.1rem;
+}
+
+// ── 빈 상태 ──
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 280px;
+  border: 2px dashed var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-disabled);
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}

@@ -1,0 +1,29 @@
+// src/assets/styles/utils/_mixins.scss
+// 역할: 재사용 가능한 SCSS 믹스인 모음
+
+@mixin respond-to($bp) {
+  @if $bp == sm { @media (max-width: 480px)  { @content; } }
+  @if $bp == md { @media (max-width: 768px)  { @content; } }
+  @if $bp == lg { @media (max-width: 1024px) { @content; } }
+}
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@mixin scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+
+  &::-webkit-scrollbar       { width: 5px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 999px; }
+}

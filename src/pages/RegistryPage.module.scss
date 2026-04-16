@@ -1,0 +1,80 @@
+// src/pages/RegistryPage.module.scss
+.page {
+  position: relative;
+}
+
+.toastContainer {
+  position: fixed;
+  top: 72px;
+  right: 1.5rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+
+  > * { pointer-events: auto; }
+}
+
+.pageHeader {
+  margin-bottom: 1.5rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.pageDesc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.searchResult {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 280px;
+  border: 2px dashed var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-disabled);
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}

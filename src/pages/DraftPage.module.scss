@@ -1,0 +1,128 @@
+// src/pages/DraftPage.module.scss
+.page {
+  position: relative;
+}
+
+.toastContainer {
+  position: fixed;
+  top: 72px;
+  right: 1.5rem;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  pointer-events: none;
+
+  > * { pointer-events: auto; }
+}
+
+.pageHeader {
+  margin-bottom: 1.75rem;
+}
+
+.pageTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+}
+
+.pageDesc {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── 폼 영역 ──
+.formSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tabBar {
+  display: flex;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.tab {
+  padding: 0.6rem 1.1rem;
+  border: none;
+  background: none;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.15s, border-color 0.15s;
+
+  &:hover { color: var(--color-text); }
+}
+
+.tabActive {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  font-weight: 600;
+}
+
+.tabDesc {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  padding: 0.1rem 0.1rem;
+}
+
+.formCard {
+  background: var(--color-surface-1);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+// ── 결과 영역 ──
+.resultSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: sticky;
+  top: 76px;
+}
+
+.resultTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.emptyResult {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  min-height: 300px;
+  border: 2px dashed var(--color-border);
+  border-radius: 10px;
+  color: var(--color-text-disabled);
+  text-align: center;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.emptyIcon {
+  font-size: 2.5rem;
+}

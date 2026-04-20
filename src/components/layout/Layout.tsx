@@ -5,13 +5,14 @@
 // =============================================================
 
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet } from 'react-router-dom';
 import styles from './Layout.module.scss';
 
 const NAV_ITEMS = [
-  { to: '/draft',    label: '✏️ 초안 만들기' },
+  { to: '/',         label: '✏️ 초안 만들기' },
   { to: '/registry', label: '📚 등록 목록' },
   { to: '/stats',    label: '📊 종합 통계' },
+  { to: '/temp',     label: '🧪 임시' },
 ];
 
 const Layout: React.FC = () => {
@@ -19,10 +20,10 @@ const Layout: React.FC = () => {
     <div className={styles.root}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <div className={styles.brand}>
+          <Link to="/" className={styles.brand}>
             <span className={styles.brandIcon}>🖊</span>
             <span className={styles.brandName}>BlogPrompt<em>Tool</em></span>
-          </div>
+          </Link>
           <nav className={styles.nav} aria-label="주 메뉴">
             {NAV_ITEMS.map(({ to, label }) => (
               <NavLink

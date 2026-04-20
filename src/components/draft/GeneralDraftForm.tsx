@@ -45,7 +45,7 @@ const GeneralDraftForm: React.FC<Props> = ({
     subTopic: '',
     tone: 'blog',
     includeHtml: false,
-    includeImage: false,
+    includeImage: true,
   });
   const [subTopicOptions, setSubTopicOptions] = useState<
     { value: string; label: string }[]

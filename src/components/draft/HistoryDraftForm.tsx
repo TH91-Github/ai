@@ -9,11 +9,11 @@
 
 import React, { useState } from 'react';
 import Input from '@/components/common/Input';
-import Select from '@/components/common/Select';
 import Toggle from '@/components/common/Toggle';
 import Button from '@/components/common/Button';
 import type { HistoryDraftForm as FormType, GeneratedPrompt } from '@/types';
 import { generateHistoryPrompt, getTodayString } from '@/utils/promptGenerator';
+import { useRegistryStore } from '@/store/useRegistryStore';
 import styles from './DraftForm.module.scss';
 
 interface Props {
@@ -21,17 +21,13 @@ interface Props {
   onError: (msg: string) => void;
 }
 
-const TONE_OPTIONS = [
-  { value: 'info',  label: '정보형 (교육적 문체)' },
-  { value: 'blog',  label: '블로그형 (스토리텔링)' },
-];
-
 const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
+  const { items } = useRegistryStore();
   const [form, setForm] = useState<FormType>({
     date: getTodayString(),
     koreaFirst: true,
-    tone: 'info',
-    includeImage: false,
+    tone: 'blog',
+    includeImage: true
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ date?: string }>({});
@@ -49,7 +45,12 @@ const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
     if (!validate()) return;
     setIsLoading(true);
     try {
-      const result = generateHistoryPrompt(form);
+      const usedHistoryTopics = items
+        .filter((item) => item.type === 'history')
+        .flatMap((item) => [item.title, item.subTopic])
+        .filter(Boolean);
+
+      const result = generateHistoryPrompt(form, usedHistoryTopics);
       onGenerated(result);
     } catch (err) {
       onError(err instanceof Error ? err.message : '프롬프트 생성 중 오류 발생');
@@ -71,22 +72,6 @@ const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
           error={errors.date}
         />
       </div>
-
-      <div className={styles.fieldRow}>
-        <Select
-          label="톤 선택"
-          options={TONE_OPTIONS}
-          value={form.tone}
-          onChange={(e) =>
-            setForm((f) => ({
-              ...f,
-              tone: e.target.value as FormType['tone'],
-            }))
-          }
-          fullWidth
-        />
-      </div>
-
       <div className={styles.toggleGroup}>
         <Toggle
           label="대한민국 사건 우선"
@@ -96,7 +81,7 @@ const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
         />
         <Toggle
           label="이미지 프롬프트 포함"
-          description="각 사건에 어울리는 이미지 프롬프트를 함께 생성합니다"
+          description="썸네일과 핵심 사건 중심으로 이미지 프롬프트를 함께 생성합니다"
           checked={form.includeImage}
           onChange={(v) => setForm((f) => ({ ...f, includeImage: v }))}
         />

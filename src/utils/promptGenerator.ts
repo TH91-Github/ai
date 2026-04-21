@@ -15,7 +15,29 @@ import { getSubTopics } from '@/data/topicPool';
 /** 현재 날짜를 YYYY-MM-DD 형식으로 반환 */
 export const getTodayString = (): string => {
   const d = new Date();
-  return d.toISOString().slice(0, 10);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+/** 다음달까지 가능하게 **/
+export const getMaxNextMonthString = () => {
+  const today = new Date();
+
+  // 다음 달로 이동
+  const nextMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    today.getDate()
+  );
+
+  // YYYY-MM-DD 포맷 맞추기
+  const yyyy = nextMonth.getFullYear();
+  const mm = String(nextMonth.getMonth() + 1).padStart(2, "0");
+  const dd = String(nextMonth.getDate()).padStart(2, "0");
+
+  return `${yyyy}-${mm}-${dd}`;
 };
 
 /** 랜덤 UUID (crypto.randomUUID 미지원 환경 폴백 포함) */
@@ -136,6 +158,7 @@ export const generateGeneralPrompt = (
 - 메인 주제: ${mainTopic}
 - 세부 주제 선정: ${subTopicHint}
 → 위 힌트를 참고하여 AI가 가장 독자에게 유익하고 흥미로운 세부 주제와 제목을 직접 결정해 주세요.
+→ 제목을 직접 결정하면서 어떤 사건, 일인지 알 수 있게도 작성해 주세요.
 → 결과물 첫 줄에 "선정된 세부 주제: ___" 형식으로 명시해 주세요.
 
 [작성 조건]
@@ -292,6 +315,7 @@ export const generateHistoryPrompt = (
 - 사건은 반드시 사실 기반으로만 정리해 주세요.
 - 연도는 자연스럽게 드러나야 하고, 역사 입문자도 쉽게 이해할 수 있어야 합니다.
 - 결과물은 내가 다른 AI에게 전달해서 HTML 완성본이나 다운로드 가능한 HTML 파일 형태로 받기 위한 요청문이므로, 그 의도가 흔들리지 않게 유지해 주세요.${excludeGuide}
+- html 파일로 다운로드할 수 있게 다시 한번.
 `.trim();
 
   return { title, prompt, subTopic, keywords, includeHtml: false };

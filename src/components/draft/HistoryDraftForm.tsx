@@ -12,7 +12,7 @@ import Input from '@/components/common/Input';
 import Toggle from '@/components/common/Toggle';
 import Button from '@/components/common/Button';
 import type { HistoryDraftForm as FormType, GeneratedPrompt } from '@/types';
-import { generateHistoryPrompt, getTodayString } from '@/utils/promptGenerator';
+import { generateHistoryPrompt, getMaxNextMonthString, getTodayString } from '@/utils/promptGenerator';
 import { useRegistryStore } from '@/store/useRegistryStore';
 import styles from './DraftForm.module.scss';
 
@@ -66,7 +66,7 @@ const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
           label="날짜 기준"
           type="date"
           value={form.date}
-          max={getTodayString()}
+          max={getMaxNextMonthString()}
           onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
           fullWidth
           error={errors.date}

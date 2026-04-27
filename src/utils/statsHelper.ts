@@ -7,7 +7,7 @@ import type { RegistryItem, StatsData } from '@/types';
 
 export const calcStats = (registry: RegistryItem[]): StatsData => {
   const byTopic: Record<string, number> = {};
-  const byType = { general: 0, history: 0 };
+  const byType = { general: 0, history: 0, song: 0, video: 0 };
   const keywordMap: Record<string, number> = {};
 
   for (const item of registry) {

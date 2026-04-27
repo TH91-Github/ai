@@ -11,13 +11,15 @@
 import React, { useState } from 'react';
 import GeneralDraftForm from '@/components/draft/GeneralDraftForm';
 import HistoryDraftForm from '@/components/draft/HistoryDraftForm';
+import SongDraftForm from '@/components/draft/SongDraftForm';
+import VideoDraftForm from '@/components/draft/VideoDraftForm';
 import PromptResult from '@/components/draft/PromptResult';
 import Toast from '@/components/common/Toast';
 import type { GeneratedPrompt, BlogType } from '@/types';
 import { useToast } from '@/hooks/useToast';
 import styles from './DraftPage.module.scss';
 
-type TabType = 'general' | 'history';
+type TabType = 'general' | 'history' | 'song' | 'video';
 
 const TABS: { key: TabType; label: string; desc: string }[] = [
   {
@@ -29,6 +31,16 @@ const TABS: { key: TabType; label: string; desc: string }[] = [
     key: 'history',
     label: '📅 오늘의 역사형',
     desc: '날짜 기준 역사적 사건 기반 프롬프트를 생성합니다',
+  },
+  {
+    key: 'song',
+    label: '🎵 노래',
+    desc: 'Suno AI 등에 바로 넣을 수 있는 음악 프롬프트를 생성합니다',
+  },
+  {
+    key: 'video',
+    label: '🎬 영상',
+    desc: '영상 생성 AI나 제작 도구에 넣을 수 있는 영상 프롬프트를 생성합니다',
   },
 ];
 
@@ -112,9 +124,19 @@ const DraftPage: React.FC = () => {
                 onDuplicateWarning={(msg) => showToast(msg, 'warning')}
                 onError={(msg) => showToast(msg, 'error')}
               />
-            ) : (
+            ) : activeTab === 'history' ? (
               <HistoryDraftForm
                 onGenerated={(r) => handleGenerated(r, '역사')}
+                onError={(msg) => showToast(msg, 'error')}
+              />
+            ) : activeTab === 'song' ? (
+              <SongDraftForm
+                onGenerated={(r) => handleGenerated(r, '노래')}
+                onError={(msg) => showToast(msg, 'error')}
+              />
+            ) : (
+              <VideoDraftForm
+                onGenerated={(r) => handleGenerated(r, '영상')}
                 onError={(msg) => showToast(msg, 'error')}
               />
             )}

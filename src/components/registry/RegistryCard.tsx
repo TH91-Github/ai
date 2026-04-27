@@ -18,6 +18,8 @@ interface Props {
 const TYPE_LABELS: Record<RegistryItem['type'], string> = {
   general: '일반 주제형',
   history: '오늘의 역사형',
+  song: '노래',
+  video: '영상',
 };
 
 const RegistryCard: React.FC<Props> = ({ item, onDelete }) => {

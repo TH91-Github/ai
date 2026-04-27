@@ -7,6 +7,8 @@
 import type {
   GeneralDraftForm,
   HistoryDraftForm,
+  SongDraftForm,
+  VideoDraftForm,
   GeneratedPrompt,
   ToneType,
 } from '@/types';
@@ -235,6 +237,7 @@ export const generateHistoryPrompt = (
 중요하게, 지금 필요한 것은 설명문이나 코드 조각이 아니라 사용자가 바로 열어볼 수 있는 완성형 HTML 결과물입니다.
 가능하다면 채팅창의 코드 설명 대신 다운로드 가능한 .html 파일, HTML 아티팩트, Canvas 결과물 형태로 제공해 주세요.
 파일 제공이 불가능한 환경이라면 그때만 완성된 HTML 전체 코드를 처음부터 끝까지 생략 없이 출력해 주세요.
+역사 정보는 반드시 사실 확인을 먼저 거친 뒤 작성해 주세요. 확인이 불충분한 내용은 추측해서 채우지 말고 제외해 주세요.
 
 입력 정보
 - 날짜: ${formattedDate}
@@ -256,6 +259,7 @@ export const generateHistoryPrompt = (
 - 그리고 마지막에 "이 중 어떤 사건으로 깊게 작성할까요?"라고 한 번 질문해 주세요.
 - 사용자가 하나를 선택하면 그때 선택된 사건만 기준으로 완성형 HTML 결과물을 작성해 주세요.
 - 처음 질문 단계에서는 HTML 전체를 만들지 말고, 사건 후보를 보여주고 선택을 기다려 주세요.
+- 사건 후보를 보여주기 전에도 연도, 사건명, 장소, 핵심 전개가 실제 역사 사실과 맞는지 먼저 확인해 주세요.
 
 3. 사용자가 사건을 고른 뒤의 전체 구조와 순서
 - 상단 대표 썸네일 시작
@@ -275,6 +279,7 @@ export const generateHistoryPrompt = (
 4. 톤과 스타일
 - ${toneGuide}
 - 말하듯 자연스럽게 작성해 주세요.
+- 지나치게 딱딱한 교과서 문체나 보고서 문체는 피하고, 이해하기 쉬운 역사 이야기 문체로 풀어 주세요.
 - 불필요한 설명을 길게 늘이지 말고 핵심만 또렷하게 정리해 주세요.
 - 중간중간 장면과 분위기가 그려질 정도의 상황 묘사는 넣되, 과장되거나 추측성 표현은 넣지 말아 주세요.
 - "그때 상황을 떠올려보면"처럼 자연스럽게 몰입을 유도하는 흐름은 사용할 수 있습니다.
@@ -293,17 +298,21 @@ export const generateHistoryPrompt = (
 - 결과 및 이후 변화에서는 사건이 어떻게 마무리됐고 이후 사회에 어떤 영향을 남겼는지 연결해 주세요.
 - 오늘의 의미에서는 지금 기준에서 왜 기억해야 하는지 현실과 이어지게 정리해 주세요.
 - "왜 중요한가" 같은 메타형 문장은 별도 항목으로 빼지 말고 전체 흐름 속에서 이해되게 드러나게 해 주세요.
+- 인물 이름, 연도, 장소, 조직, 규모, 기간 같은 사실 요소는 본문에 넣기 전에 다시 한 번 확인해 주세요.
+- 사실 확인이 애매한 숫자나 세부 묘사는 억지로 넣지 말고, 확인 가능한 범위까지만 정확하게 써 주세요.
 
 6. 분량
 - 블로그 기준으로 충분한 길이를 확보해 주세요.
 - 분량은 블로그 본문 기준으로 중간 이상 길이로 작성해 주세요.
 - 모바일로 읽었을 때도 충분히 읽을 내용이 있다고 느껴지는 수준으로 작성해 주세요.
+- 다만 지나치게 길어지지는 않게, 핵심 배경과 흐름이 또렷하게 보이는 선에서 적절한 길이로 정리해 주세요.
 - 너무 짧게 끝내지 말고, 한 사건을 중심으로 충분히 설명하되 늘어지지는 않게 정리해 주세요.${imageGuide}
 - 단순 3~4단락 요약형으로 끝내지 말고, 배경, 발단, 전개, 결과, 오늘의 의미가 모두 드러나게 작성해 주세요.
 - 각 소제목 아래에는 최소 2~4문단 정도의 설명이 들어가게 해 주세요.
 - 전체적으로 읽었을 때 짧은 소개글이 아니라 제대로 읽는 역사 블로그 글처럼 느껴져야 합니다.
 - 독자가 이 글 하나만 읽어도 사건의 배경과 흐름을 이해할 수 있을 정도의 정보량을 확보해 주세요.
 - 불필요하게 장황하게 늘이지 말고, 문단마다 새로운 정보나 맥락이 들어가게 해 주세요.
+- 같은 의미를 반복하며 길이를 늘리지 말고, 문단마다 분명한 정보나 맥락이 있어야 합니다.
 
 7. 금지 사항
 - 논문처럼 딱딱하게 설명하지 말 것
@@ -314,6 +323,8 @@ export const generateHistoryPrompt = (
 - 단순 요약형 글 금지
 - AI 느낌 나는 반복 문장 금지
 - 카드뉴스용 짧은 소개문처럼 끝나면 안 됩니다.
+- 사실이 아닌 내용을 분위기 때문에 그럴듯하게 꾸며 넣는 것 금지
+- 확인되지 않은 세부 묘사, 가공된 대사, 출처 없는 숫자 인용 금지
 - 이미지가 필요할 때도 AI 일러스트나 포스터처럼 보이는 장면은 피하고, 실제 기록 사진이나 다큐멘터리 장면처럼 보이는 실사형 분위기를 우선해 주세요.
 - 이미지 프롬프트 안에 ChatGPT, GPT, OpenAI 같은 생성 도구 이름이나 워터마크가 이미지에 나타나도록 요청하지 말아 주세요.
 - 과한 연출, 지나치게 극적인 영화 포스터 톤, 부자연스러운 얼굴 표현은 피하고 차분한 실사 사진 느낌을 우선해 주세요.
@@ -348,10 +359,189 @@ export const generateHistoryPrompt = (
 추가 기준
 - ${koreaGuide}
 - 사건은 반드시 사실 기반으로만 정리해 주세요.
+- 가능하면 신뢰할 수 있는 역사 자료, 공공기관 자료, 박물관/기념관 자료, 사료에 기반해 교차 확인해 주세요.
+- 서로 다른 자료에서 다르게 전해지는 부분이 있다면 단정하지 말고, 널리 합의된 사실만 중심으로 정리해 주세요.
 - 연도는 자연스럽게 드러나야 하고, 역사 입문자도 쉽게 이해할 수 있어야 합니다.
 - 결과물은 내가 다른 AI에게 전달해서 HTML 완성본이나 다운로드 가능한 HTML 파일 형태로 받기 위한 요청문이므로, 그 의도가 흔들리지 않게 유지해 주세요.${excludeGuide}
 - html 파일로 다운로드할 수 있게 결과물을 제공해 주세요.
 `.trim();
 
   return { title, prompt, subTopic, keywords, includeHtml: false };
+};
+
+// ── 노래 프롬프트 생성 ────────────────────────────────────────
+export const generateSongPrompt = (
+  form: SongDraftForm
+): GeneratedPrompt => {
+  const topic = form.topic.trim() || '이별 후 다시 앞으로 나아가는 마음';
+  const emotion = form.emotion.trim() || '아련함과 희망';
+  const genre = form.genre.trim() || 'K-pop ballad';
+  const tempo = form.tempo.trim() || '78 BPM';
+  const gender = form.gender.trim() || 'auto';
+  const includeLyrics = form.includeLyrics;
+  const voiceStyle = form.voiceStyle.trim() || 'emotional, clear, natural';
+  const language = form.language.trim();
+  const lyricStyle = form.lyricStyle.trim() || 'lyrical, memorable, emotional';
+  const keywords = form.keywords
+    .split(',')
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
+  const extraNotes = form.extraNotes.trim();
+
+  const keywordText = keywords.length > 0 ? keywords.join(', ') : 'nostalgia, night, memory, hope';
+  const title = `Suno용 노래 프롬프트: ${topic}`;
+  const lyricsModeText = includeLyrics ? '가사 있음' : '가사 없음 (인스트루멘탈 중심)';
+  const genderText = includeLyrics
+    ? gender === 'auto'
+      ? '비어 있으면 가장 자연스러운 방향으로 추천'
+      : gender
+    : '가사 없음이므로 성별 설정은 적용하지 않음';
+  const languageText = includeLyrics
+    ? language || '비어 있으면 주제와 분위기에 가장 잘 어울리는 언어를 추천'
+    : '가사 없음이므로 언어 설정은 생략';
+  const voiceStyleText = includeLyrics
+    ? voiceStyle
+    : '가사 없음이므로 보컬 스타일보다 악기 중심 전개를 우선';
+  const lyricStyleText = includeLyrics
+    ? lyricStyle
+    : '가사 없음이므로 가사 스타일은 적용하지 않음';
+  const outputFormat = includeLyrics
+    ? `[English Version]
+Style Tags: [Genre, Sub-Genre, BPM, Mood, Instrumentation]
+Vocal Direction: [Gender, Vocal Tone, Singing Style]
+Prompt: [Suno AI에 바로 입력 가능한 완성형 문장]
+Lyrics:
+[Intro]
+...
+[Verse]
+...
+[Pre-Chorus]
+...
+[Chorus]
+...
+[Bridge]
+...
+[Outro]
+
+[한국어 확인용 버전]
+스타일 태그: [장르, 서브장르, BPM, 분위기, 악기 구성]
+보컬 방향: [성별, 보컬 톤, 창법]
+프롬프트 해석: [영문 Prompt의 의미를 자연스럽게 옮긴 한글 문장]
+가사 해석/동일 버전:
+[Intro]
+...
+[Verse]
+...
+[Pre-Chorus]
+...
+[Chorus]
+...
+[Bridge]
+...
+[Outro]`
+    : `[English Version]
+Style Tags: [Genre, Sub-Genre, BPM, Mood, Instrumentation]
+Prompt: [Suno AI에 바로 입력 가능한 완성형 문장]
+
+[한국어 확인용 버전]
+스타일 태그: [장르, 서브장르, BPM, 분위기, 악기 구성]
+프롬프트 해석: [영문 Prompt의 의미를 자연스럽게 옮긴 한글 문장]`;
+  const prompt = `
+너는 Suno AI 음악 생성을 위한 최고 수준의 프롬프트 엔지니어이자 음악 프로듀서다.
+사용자의 입력을 바탕으로 Suno AI에 바로 입력 가능한 최적화된 프롬프트를 생성하라.
+
+[입력값]
+- 주제: ${topic}
+- 감정: ${emotion}
+- 장르: ${genre}
+- 템포: ${tempo}
+- 가사 여부: ${lyricsModeText}
+- 보컬 성별: ${genderText}
+- 보컬 스타일: ${voiceStyleText}
+- 언어: ${languageText}
+- 가사 스타일: ${lyricStyleText}
+- 추가 키워드: ${keywordText}
+- 기타 설명: ${extraNotes || '없음'}
+
+[생성 규칙]
+1. 입력값이 비어있으면 주제를 기반으로 가장 자연스럽고 트렌디한 요소를 추론하여 채운다.
+1-1. 가장 아래의 "기타 설명"이 비어 있지 않다면, 그 내용을 최우선 방향값으로 반영하고 나머지 입력값은 보조 참고로 사용한다.
+2. Style Tags는 반드시 다음 순서를 따른다:
+   [Genre, Sub-Genre, BPM, Mood, Instrumentation]
+3. 템포는 반드시 BPM 숫자로 명확히 변환한다.
+4. 가사 있음일 때만 보컬은 성별, 톤, 창법을 구체적으로 설정하되 과하지 않게 자연스럽게 구성한다.
+5. Prompt는 Style Tags와 필요한 경우 Vocal Direction을 바탕으로 한 줄의 자연스러운 문장으로 작성한다.
+6. 가사 있음일 경우 가사는 다음 구조를 기본으로 하되, 필요 시 자연스럽게 변형 가능하다:
+   [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]
+7. 가사 있음일 경우 가사는 30~40줄 내외로 구성하고, 반복과 흐름을 고려해 음악적으로 자연스럽게 작성한다.
+8. Chorus는 반드시 반복 가능하고 기억에 남는 구조로 작성한다.
+9. 첫 번째 Verse와 두 번째 Verse는 내용이 겹치지 않도록 전개한다.
+10. Bridge는 감정의 전환 포인트로 활용한다.
+11. 가사 없음일 경우에는 instrumental 트랙으로 판단하고, 언어·가사 스타일·보컬 스타일 설명은 억지로 붙이지 않는다.
+12. 가사 없음일 경우 Lyrics 섹션은 출력하지 말고, 대신 사운드 전개와 감정 흐름이 잘 보이도록 Prompt 문장을 더 정교하게 작성한다.
+13. 최종 결과는 영문 버전과 한글 확인용 버전 두 가지를 함께 출력한다.
+14. 영문 버전은 실제 Suno AI 입력용으로 가장 자연스럽고 간결하게 작성한다.
+15. 한글 버전은 사용자가 내용을 검토할 수 있도록 영문 버전과 같은 의미를 자연스럽게 풀어서 보여준다.
+16. 불필요한 태그 남용 없이, 필요한 경우에만 [Instrumental] 또는 [Interlude]를 최소로 사용한다.
+17. 설명 없이 결과만 출력한다.
+
+[출력 형식]
+${outputFormat}
+`.trim();
+
+  return { title, prompt, subTopic: topic, keywords, includeHtml: false };
+};
+
+// ── 영상 프롬프트 생성 ────────────────────────────────────────
+export const generateVideoPrompt = (
+  form: VideoDraftForm
+): GeneratedPrompt => {
+  const topic = form.topic.trim() || '짧지만 기억에 남는 브랜드 소개 영상';
+  const platform = form.platform.trim() || 'YouTube Shorts';
+  const style = form.style.trim() || 'cinematic, clean, modern';
+  const duration = form.duration.trim() || '30초';
+  const tone = form.tone.trim() || '깔끔하고 집중감 있게';
+  const audience = form.audience.trim() || '20대~30대 일반 시청자';
+  const format = form.format.trim() || 'hook - body - ending CTA';
+  const keywords = form.keywords
+    .split(',')
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
+
+  const keywordText = keywords.length > 0 ? keywords.join(', ') : 'short-form, fast pacing, visual storytelling';
+  const title = `영상 프롬프트: ${topic}`;
+  const prompt = `
+당신은 영상 기획자이자 AI 영상 생성 프롬프트 작가입니다.
+아래 입력값을 바탕으로 바로 다른 AI 영상 도구에 넣을 수 있는 완성형 영상 제작 요청문을 작성해 주세요.
+
+[입력값]
+- 주제: ${topic}
+- 플랫폼: ${platform}
+- 스타일: ${style}
+- 길이: ${duration}
+- 톤: ${tone}
+- 대상 시청자: ${audience}
+- 구성 형식: ${format}
+- 추가 키워드: ${keywordText}
+
+[작성 규칙]
+1. 입력값이 비어 있으면 주제에 가장 자연스럽게 어울리는 방향으로 보완한다.
+2. 결과는 설명 없이 바로 사용할 수 있는 요청문 형태로 작성한다.
+3. 초반 3초 안에 시선을 끄는 훅을 포함한다.
+4. 장면 흐름은 시작, 전개, 마무리가 보이도록 자연스럽게 구성한다.
+5. 과한 효과 설명보다 실제 장면이 떠오르는 문장으로 작성한다.
+6. 필요하면 나레이션 톤, 자막 톤, 화면 전환 리듬도 간단히 포함한다.
+
+[출력 형식]
+Title:
+Concept:
+Video Prompt:
+Scene Flow:
+- Scene 1
+- Scene 2
+- Scene 3
+Optional Narration:
+`.trim();
+
+  return { title, prompt, subTopic: topic, keywords, includeHtml: false };
 };

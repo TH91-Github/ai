@@ -5,7 +5,7 @@
 // =============================================================
 
 // ── 블로그 카테고리 타입 ──────────────────────────────────────
-export type BlogType = 'general' | 'history';
+export type BlogType = 'general' | 'history' | 'song' | 'video';
 export type ToneType = 'blog' | 'info';
 
 // ── 일반 주제형 입력 폼 ───────────────────────────────────────
@@ -23,6 +23,33 @@ export interface HistoryDraftForm {
   koreaFirst: boolean;    // 국내 우선 여부
   tone: ToneType;
   includeImage: boolean;
+}
+
+// ── 노래 프롬프트 입력 폼 ─────────────────────────────────────
+export interface SongDraftForm {
+  topic: string;
+  emotion: string;
+  genre: string;
+  tempo: string;
+  gender: string;
+  includeLyrics: boolean;
+  voiceStyle: string;
+  language: string;
+  lyricStyle: string;
+  keywords: string;
+  extraNotes: string;
+}
+
+// ── 영상 프롬프트 입력 폼 ─────────────────────────────────────
+export interface VideoDraftForm {
+  topic: string;
+  platform: string;
+  style: string;
+  duration: string;
+  tone: string;
+  audience: string;
+  format: string;
+  keywords: string;
 }
 
 // ── 등록 목록 항목 ────────────────────────────────────────────

@@ -22,6 +22,8 @@ import styles from './RegistryPage.module.scss';
 const TYPE_OPTIONS = [
   { value: 'general', label: '일반 주제형' },
   { value: 'history', label: '오늘의 역사형' },
+  { value: 'song', label: '노래' },
+  { value: 'video', label: '영상' },
 ];
 
 const RegistryPage: React.FC = () => {

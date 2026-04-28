@@ -7,6 +7,25 @@
 // ── 블로그 카테고리 타입 ──────────────────────────────────────
 export type BlogType = 'general' | 'history' | 'song' | 'video';
 export type ToneType = 'blog' | 'info';
+export type MusicPurpose =
+  | 'youtube_focus'
+  | 'cooking_bgm'
+  | 'daily_listen'
+  | 'emotional_playlist'
+  | 'cafe_bgm'
+  | 'shorts_bgm'
+  | 'general_music';
+export type InstrumentType =
+  | 'piano'
+  | 'acoustic_guitar'
+  | 'electric_guitar'
+  | 'lofi_keys'
+  | 'strings'
+  | 'synth_pad'
+  | 'jazz_piano'
+  | 'mixed';
+export type LyricsMode = 'with_lyrics' | 'no_lyrics';
+export type VocalGender = 'female' | 'male' | 'mixed' | 'ai_recommend';
 
 // ── 일반 주제형 입력 폼 ───────────────────────────────────────
 export interface GeneralDraftForm {
@@ -27,17 +46,56 @@ export interface HistoryDraftForm {
 
 // ── 노래 프롬프트 입력 폼 ─────────────────────────────────────
 export interface SongDraftForm {
+  purpose: MusicPurpose;
   topic: string;
-  emotion: string;
+  mood: string;
   genre: string;
   tempo: string;
-  gender: string;
+  instrument: InstrumentType;
   includeLyrics: boolean;
+  gender: VocalGender;
   voiceStyle: string;
   language: string;
   lyricStyle: string;
   keywords: string;
   extraNotes: string;
+}
+
+export interface SongPromptInput {
+  purpose: MusicPurpose;
+  topic: string;
+  mood: string;
+  genre: string;
+  tempo: string;
+  instrument: InstrumentType;
+  lyricsMode: LyricsMode;
+  vocalGender: VocalGender;
+  vocalStyle: string;
+  lyricStyle: string;
+  language: string;
+  keywords: string;
+  extra: string;
+}
+
+export interface SavedSongPrompt {
+  id: string;
+  type: 'song';
+  createdAt: number;
+  input: SongPromptInput;
+  sunoPrompt: string;
+  youtubeTitles: string[];
+  youtubeDescription: string;
+  youtubeTags: string;
+}
+
+export interface SongGeneratedData {
+  input: SongPromptInput;
+  sunoPrompt: string;
+  koreanPrompt: string;
+  youtubeTitles: string[];
+  youtubeDescription: string;
+  youtubeTags: string;
+  contentIdNotes: string[];
 }
 
 // ── 영상 프롬프트 입력 폼 ─────────────────────────────────────
@@ -63,6 +121,7 @@ export interface RegistryItem {
   url: string;
   keywords: string[];
   createdAt: string;      // ISO 8601
+  songData?: SavedSongPrompt;
 }
 
 // ── 중복 체크 결과 ────────────────────────────────────────────
@@ -79,6 +138,7 @@ export interface GeneratedPrompt {
   subTopic: string;
   keywords: string[];
   includeHtml: boolean; // HTML 파일 다운로드 버튼 표시 여부
+  songData?: SongGeneratedData;
 }
 
 // ── 통계 ─────────────────────────────────────────────────────

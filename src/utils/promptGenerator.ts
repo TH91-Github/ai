@@ -8,9 +8,14 @@ import type {
   GeneralDraftForm,
   HistoryDraftForm,
   SongDraftForm,
+  SongGeneratedData,
+  SongPromptInput,
   VideoDraftForm,
   GeneratedPrompt,
   ToneType,
+  MusicPurpose,
+  InstrumentType,
+  VocalGender,
 } from '@/types';
 import { getSubTopics } from '@/data/topicPool';
 
@@ -215,7 +220,9 @@ export const generateHistoryPrompt = (
   const imageGuide = includeImage
     ? `\n- 이미지 프롬프트는 썸네일 1개와 본문 최대 2개까지만 넣어 주세요.
   위치 기준: 도입부 상단 1개, 가장 인상적인 장면 1개, 필요할 때만 마무리 대표 이미지 1개
-  형식은 반드시 [Image prompt: 영어 설명, historical photo style, cinematic lighting] 로 맞춰 주세요.
+  형식은 반드시 [Image prompt: 영어 설명] 로 맞춰 주세요.
+  상단 대표 이미지와 본문 이미지는 documentary historical photo style, realistic environment, natural cinematic lighting 같은 실사형 기록 사진 분위기로 작성해 주세요.
+  단, 마지막 도깨비 이미지는 같은 실사 사진 스타일을 그대로 적용하지 말고, 사용자가 준 푸른 도깨비 레퍼런스를 바탕으로 한 애니메이션 캐릭터 스타일로 따로 작성해 주세요.
   중간중간 이미지를 많이 넣지 말고, 이야기 흐름상 꼭 필요한 장면에만 배치해 주세요.
   인물 장면을 만들 때는 인원이 과하게 많아 보이지 않게 하고, 자연스러운 거리감과 배치를 유지해 주세요.
   필요하면 한 인물의 뒤쪽이나 옆쪽 시점, 약간 흐린 전경, 조용한 긴장감 같은 다큐멘터리 사진 문법을 활용해 주세요.
@@ -348,10 +355,12 @@ export const generateHistoryPrompt = (
 - 상단 대표 이미지는 사건 분위기 전체를 보여주는 장면이어야 합니다.
 - 본문 중간 이미지는 사건 상황과 직접 연결되어야 하며, 매번 같은 스타일로 반복되지 않아야 합니다.
 - 마지막 대표 이미지를 제안할 때는 사용자가 전달하는 푸른 도깨비 레퍼런스 이미지를 기준으로, 도깨비의 표정·행동·시선이 오늘 본문 내용과 어울리게 작성해 주세요.
+- 마지막 도깨비 이미지는 배경은 현실적인 역사 현장처럼 유지하되, 도깨비 자체는 실사 인물이 아니라 애니메이션 캐릭터처럼 보이게 작성해 주세요.
+- 즉, 배경은 realistic historical background, 도깨비는 animated goblin character based on the provided reference 라는 기준으로 분리해 주세요.
 - 마지막 도깨비 이미지는 절대 웃지 않고, 진중하거나 침묵하거나 생각에 잠긴 감정으로 표현해 주세요.
 - 배경에는 본문 사건과 연결되는 요소를 넣되, 텍스트는 넣지 말아 주세요.
 - 이 마지막 대표 이미지는 본문 장면을 단순 반복하지 말고, 글 전체를 대표하는 마무리 컷처럼 보여야 합니다.
-- 필요한 경우 형식은 [마무리 도깨비 이미지 프롬프트: ...] 로 따로 구분해 주세요.
+- 필요한 경우 형식은 [마무리 도깨비 이미지 프롬프트: 영어 설명, realistic historical background, animated goblin character based on provided reference, no text] 로 따로 구분해 주세요.
 - 가장 하단 요약 섹션의 타이틀은 반드시 "핵심 요약"으로 고정해 주세요.
 - 마지막 마무리 문장은 별도 소제목 없이, 오늘 이야기를 조용히 정리해 주는 한두 문장으로 마감해 주세요.
 - 글의 맨 아래에는 #오늘의역사 형태의 해시태그를 6~10개 정도 한 줄 또는 두 줄로 자연스럽게 정리해 주세요.
@@ -373,123 +382,309 @@ export const generateHistoryPrompt = (
 export const generateSongPrompt = (
   form: SongDraftForm
 ): GeneratedPrompt => {
-  const topic = form.topic.trim() || '이별 후 다시 앞으로 나아가는 마음';
-  const emotion = form.emotion.trim() || '아련함과 희망';
-  const genre = form.genre.trim() || 'K-pop ballad';
-  const tempo = form.tempo.trim() || '78 BPM';
-  const gender = form.gender.trim() || 'auto';
-  const includeLyrics = form.includeLyrics;
-  const voiceStyle = form.voiceStyle.trim() || 'emotional, clear, natural';
+  const MUSIC_PURPOSE_OPTIONS: Record<MusicPurpose, string> = {
+    youtube_focus: '유튜브 조회수형 / 공부·집중',
+    cooking_bgm: '요리·브이로그 BGM',
+    daily_listen: '일상에서 듣기 좋은 노래',
+    emotional_playlist: '감성 플레이리스트',
+    cafe_bgm: '카페·휴식 음악',
+    shorts_bgm: '쇼츠·릴스용 짧은 음악',
+    general_music: '그 외(기타)',
+  };
+
+  const purposePromptMap: Record<MusicPurpose, string> = {
+    youtube_focus:
+      'lofi study music for deep focus and concentration, calm mood, minimal arrangement, long listening friendly, soft rain ambience optional, relaxing but not sleepy',
+    cooking_bgm:
+      'light cooking background music, upbeat and cozy mood, warm kitchen atmosphere, gentle rhythm, positive vibe, suitable for food vlog and cooking video editing, not melancholic, not gloomy, bright but not childish, warm kitchen mood, light rhythm for editing',
+    daily_listen:
+      'easy listening pop song for daily life, warm and comfortable mood, relatable emotion, soft catchy melody, clean arrangement, suitable for casual listening',
+    emotional_playlist:
+      'emotional playlist music, nostalgic mood, night atmosphere, gentle build-up, cinematic but simple arrangement, warm and reflective feeling',
+    cafe_bgm:
+      'cozy cafe background music, relaxing lounge mood, warm texture, soft rhythm, comfortable atmosphere, suitable for long listening',
+    shorts_bgm:
+      'short-form background music for YouTube Shorts and Reels, memorable intro, quick emotional impact, clean hook, simple structure, suitable for 15 to 30 second clips',
+    general_music:
+      'balanced original music, natural emotional flow, clean arrangement, easy to use across different content types, not too extreme, generally versatile and comfortable to listen to',
+  };
+
+  const instrumentPromptMap: Record<InstrumentType, string> = {
+    piano: 'soft emotional piano, clean natural tone',
+    acoustic_guitar: 'warm acoustic guitar, gentle fingerpicking',
+    electric_guitar: 'clean electric guitar, ambient reverb, soft melodic lines',
+    lofi_keys: 'lofi keys, warm analog texture, subtle vinyl atmosphere',
+    strings: 'soft cinematic strings, gentle orchestral layers',
+    synth_pad: 'ambient synth pads, dreamy spacious texture',
+    jazz_piano: 'smooth jazz piano, warm lounge atmosphere',
+    mixed: 'soft piano, warm acoustic guitar, subtle ambient pads',
+  };
+  const instrumentLabelMap: Record<InstrumentType, string> = {
+    piano: '피아노',
+    acoustic_guitar: '통기타',
+    electric_guitar: '일렉 기타',
+    lofi_keys: '로파이 건반',
+    strings: '스트링',
+    synth_pad: '신스 패드',
+    jazz_piano: '재즈 피아노',
+    mixed: 'AI 추천 믹스',
+  };
+
+  const topic = form.topic.trim() || '감성 음악';
+  const mood = form.mood.trim() || '따뜻함과 편안함';
+  const genre = form.genre.trim() || 'lofi piano';
+  const tempo = form.tempo.trim() || '70-85 BPM';
+  const lyricsMode = form.includeLyrics ? 'with_lyrics' : 'no_lyrics';
   const language = form.language.trim();
-  const lyricStyle = form.lyricStyle.trim() || 'lyrical, memorable, emotional';
+  const voiceStyle = form.voiceStyle.trim();
+  const lyricStyle = form.lyricStyle.trim();
   const keywords = form.keywords
     .split(',')
     .map((keyword) => keyword.trim())
     .filter(Boolean);
-  const extraNotes = form.extraNotes.trim();
+  const extra = form.extraNotes.trim();
 
-  const keywordText = keywords.length > 0 ? keywords.join(', ') : 'nostalgia, night, memory, hope';
-  const title = `Suno용 노래 프롬프트: ${topic}`;
-  const lyricsModeText = includeLyrics ? '가사 있음' : '가사 없음 (인스트루멘탈 중심)';
-  const genderText = includeLyrics
-    ? gender === 'auto'
-      ? '비어 있으면 가장 자연스러운 방향으로 추천'
-      : gender
-    : '가사 없음이므로 성별 설정은 적용하지 않음';
-  const languageText = includeLyrics
-    ? language || '비어 있으면 주제와 분위기에 가장 잘 어울리는 언어를 추천'
-    : '가사 없음이므로 언어 설정은 생략';
-  const voiceStyleText = includeLyrics
-    ? voiceStyle
-    : '가사 없음이므로 보컬 스타일보다 악기 중심 전개를 우선';
-  const lyricStyleText = includeLyrics
-    ? lyricStyle
-    : '가사 없음이므로 가사 스타일은 적용하지 않음';
-  const outputFormat = includeLyrics
-    ? `[English Version]
-Style Tags: [Genre, Sub-Genre, BPM, Mood, Instrumentation]
-Vocal Direction: [Gender, Vocal Tone, Singing Style]
-Prompt: [Suno AI에 바로 입력 가능한 완성형 문장]
-Lyrics:
-[Intro]
-...
-[Verse]
-...
-[Pre-Chorus]
-...
-[Chorus]
-...
-[Bridge]
-...
-[Outro]
+  const input: SongPromptInput = {
+    purpose: form.purpose,
+    topic,
+    mood,
+    genre,
+    tempo,
+    instrument: form.instrument,
+    lyricsMode,
+    vocalGender: form.gender,
+    vocalStyle: voiceStyle,
+    lyricStyle,
+    language,
+    keywords: keywords.join(', '),
+    extra,
+  };
 
-[한국어 확인용 버전]
-스타일 태그: [장르, 서브장르, BPM, 분위기, 악기 구성]
-보컬 방향: [성별, 보컬 톤, 창법]
-프롬프트 해석: [영문 Prompt의 의미를 자연스럽게 옮긴 한글 문장]
-가사 해석/동일 버전:
-[Intro]
-...
-[Verse]
-...
-[Pre-Chorus]
-...
-[Chorus]
-...
-[Bridge]
-...
-[Outro]`
-    : `[English Version]
-Style Tags: [Genre, Sub-Genre, BPM, Mood, Instrumentation]
-Prompt: [Suno AI에 바로 입력 가능한 완성형 문장]
+  const safetyPrompt = [
+    'unique arrangement',
+    'original composition style',
+    'non-generic melody',
+    'avoid similarity to existing songs',
+    'avoid artist imitation',
+    'avoid copyrighted melody',
+    'dynamic song structure',
+  ].join(', ');
 
-[한국어 확인용 버전]
-스타일 태그: [장르, 서브장르, BPM, 분위기, 악기 구성]
-프롬프트 해석: [영문 Prompt의 의미를 자연스럽게 옮긴 한글 문장]`;
-  const prompt = `
-너는 Suno AI 음악 생성을 위한 최고 수준의 프롬프트 엔지니어이자 음악 프로듀서다.
-사용자의 입력을 바탕으로 Suno AI에 바로 입력 가능한 최적화된 프롬프트를 생성하라.
+  const noLyricsPrompt =
+    'instrumental, no vocals, background music, loopable structure, suitable for YouTube background use';
 
-[입력값]
-- 주제: ${topic}
-- 감정: ${emotion}
-- 장르: ${genre}
-- 템포: ${tempo}
-- 가사 여부: ${lyricsModeText}
-- 보컬 성별: ${genderText}
-- 보컬 스타일: ${voiceStyleText}
-- 언어: ${languageText}
-- 가사 스타일: ${lyricStyleText}
-- 추가 키워드: ${keywordText}
-- 기타 설명: ${extraNotes || '없음'}
+  const withLyricsPrompt =
+    'with vocals, easy listening, relatable daily mood, soft catchy melody, natural vocal performance';
 
-[생성 규칙]
-1. 입력값이 비어있으면 주제를 기반으로 가장 자연스럽고 트렌디한 요소를 추론하여 채운다.
-1-1. 가장 아래의 "기타 설명"이 비어 있지 않다면, 그 내용을 최우선 방향값으로 반영하고 나머지 입력값은 보조 참고로 사용한다.
-2. Style Tags는 반드시 다음 순서를 따른다:
-   [Genre, Sub-Genre, BPM, Mood, Instrumentation]
-3. 템포는 반드시 BPM 숫자로 명확히 변환한다.
-4. 가사 있음일 때만 보컬은 성별, 톤, 창법을 구체적으로 설정하되 과하지 않게 자연스럽게 구성한다.
-5. Prompt는 Style Tags와 필요한 경우 Vocal Direction을 바탕으로 한 줄의 자연스러운 문장으로 작성한다.
-6. 가사 있음일 경우 가사는 다음 구조를 기본으로 하되, 필요 시 자연스럽게 변형 가능하다:
-   [Intro], [Verse], [Pre-Chorus], [Chorus], [Bridge], [Outro]
-7. 가사 있음일 경우 가사는 30~40줄 내외로 구성하고, 반복과 흐름을 고려해 음악적으로 자연스럽게 작성한다.
-8. Chorus는 반드시 반복 가능하고 기억에 남는 구조로 작성한다.
-9. 첫 번째 Verse와 두 번째 Verse는 내용이 겹치지 않도록 전개한다.
-10. Bridge는 감정의 전환 포인트로 활용한다.
-11. 가사 없음일 경우에는 instrumental 트랙으로 판단하고, 언어·가사 스타일·보컬 스타일 설명은 억지로 붙이지 않는다.
-12. 가사 없음일 경우 Lyrics 섹션은 출력하지 말고, 대신 사운드 전개와 감정 흐름이 잘 보이도록 Prompt 문장을 더 정교하게 작성한다.
-13. 최종 결과는 영문 버전과 한글 확인용 버전 두 가지를 함께 출력한다.
-14. 영문 버전은 실제 Suno AI 입력용으로 가장 자연스럽고 간결하게 작성한다.
-15. 한글 버전은 사용자가 내용을 검토할 수 있도록 영문 버전과 같은 의미를 자연스럽게 풀어서 보여준다.
-16. 불필요한 태그 남용 없이, 필요한 경우에만 [Instrumental] 또는 [Interlude]를 최소로 사용한다.
-17. 설명 없이 결과만 출력한다.
+  const getVocalPrompt = (vocalGender: VocalGender) => {
+    if (vocalGender === 'female') return 'female vocal, emotional and clear tone';
+    if (vocalGender === 'male') return 'male vocal, warm and natural tone';
+    if (vocalGender === 'mixed') return 'mixed male and female vocals, balanced harmony';
+    return 'natural vocal tone selected to fit the mood';
+  };
 
-[출력 형식]
-${outputFormat}
-`.trim();
+  const buildSunoPrompt = (songInput: SongPromptInput) => {
+    const parts = [
+      purposePromptMap[songInput.purpose],
+      songInput.topic ? `theme: ${songInput.topic}` : '',
+      songInput.mood ? `mood: ${songInput.mood}` : '',
+      songInput.genre ? `genre: ${songInput.genre}` : '',
+      songInput.tempo ? `tempo: ${songInput.tempo}` : '',
+      instrumentPromptMap[songInput.instrument],
+      songInput.lyricsMode === 'no_lyrics' ? noLyricsPrompt : withLyricsPrompt,
+      songInput.lyricsMode === 'with_lyrics' ? getVocalPrompt(songInput.vocalGender) : '',
+      songInput.lyricsMode === 'with_lyrics' && songInput.vocalStyle
+        ? `vocal style: ${songInput.vocalStyle}`
+        : '',
+      songInput.lyricsMode === 'with_lyrics' && songInput.lyricStyle
+        ? `lyric style: ${songInput.lyricStyle}`
+        : '',
+      songInput.lyricsMode === 'with_lyrics' && songInput.language
+        ? `language: ${songInput.language}`
+        : '',
+      songInput.keywords ? `keywords: ${songInput.keywords}` : '',
+      songInput.extra ? `additional direction: ${songInput.extra}` : '',
+      safetyPrompt,
+    ];
 
-  return { title, prompt, subTopic: topic, keywords, includeHtml: false };
+    return parts.filter(Boolean).join(', ');
+  };
+
+  const buildKoreanPrompt = (songInput: SongPromptInput) => {
+    const lyricTone =
+      songInput.lyricsMode === 'no_lyrics'
+        ? '가사 없는 인스트루멘탈 BGM'
+        : '보컬이 포함된 이지리스닝 음악';
+    const vocalGuide =
+      songInput.lyricsMode === 'with_lyrics'
+        ? songInput.vocalGender === 'female'
+          ? '여성 보컬 중심'
+          : songInput.vocalGender === 'male'
+            ? '남성 보컬 중심'
+            : songInput.vocalGender === 'mixed'
+              ? '혼성 보컬 조화'
+              : '분위기에 맞는 자연스러운 보컬'
+        : '보컬 없음';
+
+    return [
+      `${MUSIC_PURPOSE_OPTIONS[songInput.purpose]} 용도에 맞춘 ${lyricTone}`,
+      songInput.topic ? `주제는 "${songInput.topic}"` : '',
+      songInput.mood ? `분위기는 "${songInput.mood}"` : '',
+      songInput.genre ? `장르는 ${songInput.genre}` : '',
+      songInput.tempo ? `템포는 ${songInput.tempo}` : '',
+      `주요 악기는 ${instrumentLabelMap[songInput.instrument] ?? 'AI 추천 믹스'}`,
+      songInput.lyricsMode === 'with_lyrics' ? `${vocalGuide}으로 전개` : '반복 재생에 어울리는 루프형 구조 우선',
+      songInput.extra ? `추가 방향은 "${songInput.extra}"` : '',
+      '기존 곡과 비슷한 멜로디나 특정 아티스트 모방은 피하고, 오리지널 구성으로 전개',
+    ].filter(Boolean).join(', ');
+  };
+
+  const buildYoutubeTitles = (songInput: SongPromptInput) => {
+    const safeTopic = songInput.topic || '감성 음악';
+
+    if (songInput.purpose === 'youtube_focus') {
+      return [
+        `${safeTopic} 집중할 때 듣기 좋은 음악`,
+        `${safeTopic} Study Music for Deep Focus`,
+        '조용히 몰입하고 싶을 때 듣는 BGM',
+      ];
+    }
+
+    if (songInput.purpose === 'cooking_bgm') {
+      return [
+        `${safeTopic} 요리할 때 듣기 좋은 산뜻한 BGM`,
+        'Cooking Vlog Music | Cozy Kitchen BGM',
+        '요리 영상에 어울리는 따뜻한 브금',
+      ];
+    }
+
+    if (songInput.purpose === 'daily_listen') {
+      return [
+        `${safeTopic} 일상에서 편하게 듣기 좋은 노래`,
+        `${safeTopic} Easy Listening Pop Song`,
+        '하루 끝에 듣기 좋은 편안한 음악',
+      ];
+    }
+
+    if (songInput.purpose === 'emotional_playlist') {
+      return [
+        `${safeTopic} 감성 플레이리스트`,
+        `Emotional Night Playlist | ${safeTopic}`,
+        '조용한 밤에 듣기 좋은 감성 음악',
+      ];
+    }
+
+    if (songInput.purpose === 'cafe_bgm') {
+      return [
+        `${safeTopic} 카페에서 듣기 좋은 음악`,
+        'Cozy Cafe Music | Relaxing BGM',
+        '편안한 오후를 위한 카페 브금',
+      ];
+    }
+
+    if (songInput.purpose === 'general_music') {
+      return [
+        `${safeTopic} 편하게 듣기 좋은 오리지널 음악`,
+        `${safeTopic} Original Easy Listening Music`,
+        '가볍게 틀어두기 좋은 분위기 음악',
+      ];
+    }
+
+    return [
+      `${safeTopic} 쇼츠에 어울리는 짧은 BGM`,
+      'Shorts BGM | Catchy Short Music',
+      '릴스와 쇼츠에 쓰기 좋은 음악',
+    ];
+  };
+
+  const buildYoutubeDescription = (songInput: SongPromptInput) => `이 음악은 ${MUSIC_PURPOSE_OPTIONS[songInput.purpose]}에 맞춰 제작한 AI 기반 오리지널 음악입니다.
+
+주제: ${songInput.topic || '미입력'}
+분위기: ${songInput.mood || '미입력'}
+장르: ${songInput.genre || '미입력'}
+템포: ${songInput.tempo || '미입력'}
+
+공부, 휴식, 브이로그, 요리 영상, 일상 플레이리스트 등 다양한 상황에서 편하게 들을 수 있도록 구성했습니다.
+
+※ 본 음원은 기존 곡이나 특정 아티스트를 모방하지 않는 방향으로 제작되었습니다.
+※ AI 생성 음악 특성상 플랫폼 등록 전 최종 권리/유통 정책은 사용하는 서비스 기준을 확인해 주세요.`;
+
+  const buildYoutubeTags = (songInput: SongPromptInput) => {
+    const baseTags = ['#SunoAI', '#AI음악', '#브금', '#BGM'];
+
+    const purposeTags: Record<MusicPurpose, string[]> = {
+      youtube_focus: ['#공부음악', '#집중음악', '#StudyMusic', '#FocusMusic'],
+      cooking_bgm: ['#요리브금', '#요리영상', '#CookingMusic', '#FoodVlog'],
+      daily_listen: ['#일상음악', '#이지리스닝', '#DailyMusic', '#EasyListening'],
+      emotional_playlist: ['#감성음악', '#플레이리스트', '#EmotionalMusic', '#Playlist'],
+      cafe_bgm: ['#카페음악', '#휴식음악', '#CafeMusic', '#RelaxingMusic'],
+      shorts_bgm: ['#쇼츠브금', '#릴스음악', '#ShortsBGM', '#ReelsMusic'],
+      general_music: ['#오리지널음악', '#배경음악', '#EasyListening', '#OriginalMusic'],
+    };
+
+    const topicTag = songInput.topic ? [`#${songInput.topic.replace(/\s/g, '')}`] : [];
+
+    return [...topicTag, ...purposeTags[songInput.purpose], ...baseTags].join(' ');
+  };
+
+  const sunoPrompt = buildSunoPrompt(input);
+  const koreanPrompt = buildKoreanPrompt(input);
+  const youtubeTitles = buildYoutubeTitles(input);
+  const youtubeDescription = buildYoutubeDescription(input);
+  const youtubeTags = buildYoutubeTags(input);
+  const contentIdNotes = [
+    '기존 곡·아티스트 모방을 피하도록 구성했습니다.',
+    '반복 재생과 유튜브 활용에 적합한 구조를 포함했습니다.',
+    '단, AI 생성 음악 특성상 Content ID 충돌 가능성이 완전히 사라지는 것은 아닙니다.',
+  ];
+
+  const songData: SongGeneratedData = {
+    input,
+    sunoPrompt,
+    koreanPrompt,
+    youtubeTitles,
+    youtubeDescription,
+    youtubeTags,
+    contentIdNotes,
+  };
+
+  const title = `노래 생성 결과: ${topic}`;
+  const prompt = `## 🎵 Suno AI 프롬프트
+
+${sunoPrompt}
+
+## 🇰🇷 한글 확인용
+
+${koreanPrompt}
+
+## 🛡️ Content ID 안정성 체크
+
+- ${contentIdNotes[0]}
+- ${contentIdNotes[1]}
+- ${contentIdNotes[2]}
+
+## 📺 유튜브 제목 추천
+
+1. ${youtubeTitles[0]}
+2. ${youtubeTitles[1]}
+3. ${youtubeTitles[2]}
+
+## 📝 유튜브 설명 초안
+
+${youtubeDescription}
+
+## #️⃣ 태그 추천
+
+${youtubeTags}`;
+
+  return {
+    title,
+    prompt,
+    subTopic: topic,
+    keywords: keywords.length > 0 ? keywords : [topic, input.genre, input.mood].filter(Boolean),
+    includeHtml: false,
+    songData,
+  };
 };
 
 // ── 영상 프롬프트 생성 ────────────────────────────────────────

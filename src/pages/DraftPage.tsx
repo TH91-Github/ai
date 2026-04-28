@@ -35,7 +35,7 @@ const TABS: { key: TabType; label: string; desc: string }[] = [
   {
     key: 'song',
     label: '🎵 노래',
-    desc: 'Suno AI 등에 바로 넣을 수 있는 음악 프롬프트를 생성합니다',
+    desc: 'Suno 프롬프트와 유튜브 제목·설명·태그를 함께 생성합니다',
   },
   {
     key: 'video',

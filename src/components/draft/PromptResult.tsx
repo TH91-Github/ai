@@ -86,6 +86,18 @@ const PromptResult: React.FC<Props> = ({
         title: result.title,
         url: url.trim(),
         keywords: result.keywords,
+        songData: result.songData
+          ? {
+              id: crypto.randomUUID?.() ?? `${Date.now()}`,
+              type: 'song',
+              createdAt: Date.now(),
+              input: result.songData.input,
+              sunoPrompt: result.songData.sunoPrompt,
+              youtubeTitles: result.songData.youtubeTitles,
+              youtubeDescription: result.songData.youtubeDescription,
+              youtubeTags: result.songData.youtubeTags,
+            }
+          : undefined,
       });
       setIsSaved(true);
       onSaved();
@@ -109,7 +121,49 @@ const PromptResult: React.FC<Props> = ({
 
       {/* 프롬프트 본문 */}
       <div className={styles.promptBox}>
-        <pre className={styles.promptText}>{result.prompt}</pre>
+        {result.songData ? (
+          <div className={styles.songSections}>
+            <section className={styles.songSection}>
+              <h4>🎵 Suno AI 프롬프트</h4>
+              <pre className={styles.promptText}>{result.songData.sunoPrompt}</pre>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>🇰🇷 한글 확인용</h4>
+              <p className={styles.songCopy}>{result.songData.koreanPrompt}</p>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>🛡️ Content ID 안정성 체크</h4>
+              <ul className={styles.songList}>
+                {result.songData.contentIdNotes.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>📺 유튜브 제목 추천</h4>
+              <ol className={styles.songList}>
+                {result.songData.youtubeTitles.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ol>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>📝 유튜브 설명 초안</h4>
+              <pre className={styles.promptText}>{result.songData.youtubeDescription}</pre>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>#️⃣ 태그 추천</h4>
+              <p className={styles.songCopy}>{result.songData.youtubeTags}</p>
+            </section>
+          </div>
+        ) : (
+          <pre className={styles.promptText}>{result.prompt}</pre>
+        )}
       </div>
 
       {/* HTML 다운로드 패널 — includeHtml=true 시 표시 */}

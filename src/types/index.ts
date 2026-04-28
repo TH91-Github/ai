@@ -26,6 +26,49 @@ export type InstrumentType =
   | 'mixed';
 export type LyricsMode = 'with_lyrics' | 'no_lyrics';
 export type VocalGender = 'female' | 'male' | 'mixed' | 'ai_recommend';
+export type SongLength = 'short' | 'medium' | 'full';
+export type SongLanguageOption = 'Korean' | 'English' | 'Other' | '';
+export type VideoPurpose =
+  | 'shorts'
+  | 'movie_trailer'
+  | 'game_trailer'
+  | 'product_promo'
+  | 'portrait';
+export type VideoBackground =
+  | 'mountain'
+  | 'city'
+  | 'forest'
+  | 'space'
+  | 'ocean'
+  | 'indoor'
+  | 'custom';
+export type VideoMood =
+  | 'epic'
+  | 'dark'
+  | 'emotional'
+  | 'tense'
+  | 'futuristic'
+  | 'calm';
+export type VideoActionType =
+  | 'intro_appearance'
+  | 'movement'
+  | 'main_action'
+  | 'emotion_shift'
+  | 'close_up'
+  | 'scene_transition'
+  | 'finale'
+  | 'product_highlight'
+  | 'background_highlight'
+  | 'slow_motion'
+  | 'camera_rotation'
+  | 'detail_cut';
+export type VideoCameraStyle =
+  | 'continuous_shot'
+  | 'handheld_cinematic'
+  | 'tracking_shot'
+  | 'drone_wide'
+  | 'close_up';
+export type VideoLength = '5s' | '8s' | '15s' | '30s';
 
 // ── 일반 주제형 입력 폼 ───────────────────────────────────────
 export interface GeneralDraftForm {
@@ -52,9 +95,11 @@ export interface SongDraftForm {
   genre: string;
   tempo: string;
   instrument: InstrumentType;
+  songLength: SongLength;
   includeLyrics: boolean;
   gender: VocalGender;
   voiceStyle: string;
+  languageOption: SongLanguageOption;
   language: string;
   lyricStyle: string;
   keywords: string;
@@ -68,6 +113,7 @@ export interface SongPromptInput {
   genre: string;
   tempo: string;
   instrument: InstrumentType;
+  songLength: SongLength;
   lyricsMode: LyricsMode;
   vocalGender: VocalGender;
   vocalStyle: string;
@@ -100,14 +146,25 @@ export interface SongGeneratedData {
 
 // ── 영상 프롬프트 입력 폼 ─────────────────────────────────────
 export interface VideoDraftForm {
-  topic: string;
-  platform: string;
-  style: string;
-  duration: string;
-  tone: string;
-  audience: string;
-  format: string;
-  keywords: string;
+  purpose: VideoPurpose;
+  useReferenceImage: boolean;
+  characterDescription: string;
+  background: VideoBackground;
+  customBackground: string;
+  mood: VideoMood;
+  actions: VideoActionType[];
+  cameraStyles: VideoCameraStyle[];
+  length: VideoLength;
+  dialogueMode: 'none' | 'custom';
+  dialogue: string;
+  extraRequest: string;
+  physicsBoost: boolean;
+  objectVisibility: boolean;
+  identityLock: boolean;
+  cameraContinuity: boolean;
+  errorPrevention: boolean;
+  styleConsistency: boolean;
+  backgroundConsistency: boolean;
 }
 
 // ── 등록 목록 항목 ────────────────────────────────────────────

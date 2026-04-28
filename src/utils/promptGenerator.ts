@@ -429,13 +429,24 @@ export const generateSongPrompt = (
     jazz_piano: '재즈 피아노',
     mixed: 'AI 추천 믹스',
   };
+  const fixedLengthGuide = [
+    'short-form music, optimized for 15-20 seconds, instant hook within 1-2 seconds, minimal structure, loopable ending, no long intro, no complex transitions',
+    'short track, around 1 minute length, simple verse and light chorus, no long intro, smooth and loopable structure',
+    'full-length song, complete structure with intro, verse, chorus, bridge, emotional progression, natural ending',
+  ];
 
   const topic = form.topic.trim() || '감성 음악';
   const mood = form.mood.trim() || '따뜻함과 편안함';
   const genre = form.genre.trim() || 'lofi piano';
   const tempo = form.tempo.trim() || '70-85 BPM';
+  const songLength = form.songLength;
   const lyricsMode = form.includeLyrics ? 'with_lyrics' : 'no_lyrics';
-  const language = form.language.trim();
+  const language =
+    form.languageOption === 'Korean'
+      ? 'Korean'
+      : form.languageOption === 'English'
+        ? 'English'
+        : form.language.trim();
   const voiceStyle = form.voiceStyle.trim();
   const lyricStyle = form.lyricStyle.trim();
   const keywords = form.keywords
@@ -451,6 +462,7 @@ export const generateSongPrompt = (
     genre,
     tempo,
     instrument: form.instrument,
+    songLength,
     lyricsMode,
     vocalGender: form.gender,
     vocalStyle: voiceStyle,
@@ -490,6 +502,7 @@ export const generateSongPrompt = (
       songInput.mood ? `mood: ${songInput.mood}` : '',
       songInput.genre ? `genre: ${songInput.genre}` : '',
       songInput.tempo ? `tempo: ${songInput.tempo}` : '',
+      `length options: ${fixedLengthGuide.join(' / ')}`,
       instrumentPromptMap[songInput.instrument],
       songInput.lyricsMode === 'no_lyrics' ? noLyricsPrompt : withLyricsPrompt,
       songInput.lyricsMode === 'with_lyrics' ? getVocalPrompt(songInput.vocalGender) : '',
@@ -532,6 +545,7 @@ export const generateSongPrompt = (
       songInput.mood ? `분위기는 "${songInput.mood}"` : '',
       songInput.genre ? `장르는 ${songInput.genre}` : '',
       songInput.tempo ? `템포는 ${songInput.tempo}` : '',
+      '길이 방향은 15~20초 쇼츠형, 약 1분형, 2~3분 이상 풀버전형까지 모두 고려',
       `주요 악기는 ${instrumentLabelMap[songInput.instrument] ?? 'AI 추천 믹스'}`,
       songInput.lyricsMode === 'with_lyrics' ? `${vocalGuide}으로 전개` : '반복 재생에 어울리는 루프형 구조 우선',
       songInput.extra ? `추가 방향은 "${songInput.extra}"` : '',
@@ -603,35 +617,18 @@ export const generateSongPrompt = (
 분위기: ${songInput.mood || '미입력'}
 장르: ${songInput.genre || '미입력'}
 템포: ${songInput.tempo || '미입력'}
+길이 가이드: 15~20초 쇼츠형 / 약 1분형 / 2~3분 이상 풀버전형
 
 공부, 휴식, 브이로그, 요리 영상, 일상 플레이리스트 등 다양한 상황에서 편하게 들을 수 있도록 구성했습니다.
 
 ※ 본 음원은 기존 곡이나 특정 아티스트를 모방하지 않는 방향으로 제작되었습니다.
 ※ AI 생성 음악 특성상 플랫폼 등록 전 최종 권리/유통 정책은 사용하는 서비스 기준을 확인해 주세요.`;
 
-  const buildYoutubeTags = (songInput: SongPromptInput) => {
-    const baseTags = ['#SunoAI', '#AI음악', '#브금', '#BGM'];
-
-    const purposeTags: Record<MusicPurpose, string[]> = {
-      youtube_focus: ['#공부음악', '#집중음악', '#StudyMusic', '#FocusMusic'],
-      cooking_bgm: ['#요리브금', '#요리영상', '#CookingMusic', '#FoodVlog'],
-      daily_listen: ['#일상음악', '#이지리스닝', '#DailyMusic', '#EasyListening'],
-      emotional_playlist: ['#감성음악', '#플레이리스트', '#EmotionalMusic', '#Playlist'],
-      cafe_bgm: ['#카페음악', '#휴식음악', '#CafeMusic', '#RelaxingMusic'],
-      shorts_bgm: ['#쇼츠브금', '#릴스음악', '#ShortsBGM', '#ReelsMusic'],
-      general_music: ['#오리지널음악', '#배경음악', '#EasyListening', '#OriginalMusic'],
-    };
-
-    const topicTag = songInput.topic ? [`#${songInput.topic.replace(/\s/g, '')}`] : [];
-
-    return [...topicTag, ...purposeTags[songInput.purpose], ...baseTags].join(' ');
-  };
-
   const sunoPrompt = buildSunoPrompt(input);
   const koreanPrompt = buildKoreanPrompt(input);
   const youtubeTitles = buildYoutubeTitles(input);
   const youtubeDescription = buildYoutubeDescription(input);
-  const youtubeTags = buildYoutubeTags(input);
+  const youtubeTags = 'AI가 음악 목적과 주제에 맞는 태그를 8~12개 추천하도록 요청';
   const contentIdNotes = [
     '기존 곡·아티스트 모방을 피하도록 구성했습니다.',
     '반복 재생과 유튜브 활용에 적합한 구조를 포함했습니다.',
@@ -675,7 +672,8 @@ ${youtubeDescription}
 
 ## #️⃣ 태그 추천
 
-${youtubeTags}`;
+음악 목적과 주제에 맞는 유튜브 태그를 8~12개 추천해 주세요.
+한글 태그와 영문 태그를 자연스럽게 섞어도 좋고, 과한 반복 태그는 피하고 실제 업로드에 쓸 만한 형태로 정리해 주세요.`;
 
   return {
     title,
@@ -691,52 +689,144 @@ ${youtubeTags}`;
 export const generateVideoPrompt = (
   form: VideoDraftForm
 ): GeneratedPrompt => {
-  const topic = form.topic.trim() || '짧지만 기억에 남는 브랜드 소개 영상';
-  const platform = form.platform.trim() || 'YouTube Shorts';
-  const style = form.style.trim() || 'cinematic, clean, modern';
-  const duration = form.duration.trim() || '30초';
-  const tone = form.tone.trim() || '깔끔하고 집중감 있게';
-  const audience = form.audience.trim() || '20대~30대 일반 시청자';
-  const format = form.format.trim() || 'hook - body - ending CTA';
-  const keywords = form.keywords
-    .split(',')
-    .map((keyword) => keyword.trim())
-    .filter(Boolean);
+  const purposeLabelMap = {
+    shorts: '쇼츠',
+    movie_trailer: '영화 예고편',
+    game_trailer: '게임 트레일러',
+    product_promo: '제품 홍보',
+    portrait: '인물 포트레이트',
+  } as const;
+  const backgroundMap = {
+    mountain: 'mountainous terrain',
+    city: 'dense cinematic city',
+    forest: 'deep forest with cinematic depth',
+    space: 'cosmic outer space environment',
+    ocean: 'open ocean with dramatic atmosphere',
+    indoor: 'stylized indoor cinematic set',
+    custom: form.customBackground.trim() || 'custom environment',
+  } as const;
+  const moodMap = {
+    epic: 'epic, intense, cinematic',
+    dark: 'dark, moody, shadow-heavy',
+    emotional: 'emotional, soft, cinematic',
+    tense: 'tense, suspenseful, high-pressure',
+    futuristic: 'futuristic, sleek, high-tech',
+    calm: 'calm, restrained, atmospheric',
+  } as const;
+  const actionMap = {
+    intro_appearance: 'intro appearance or opening visual beat',
+    movement: 'movement or approach through the environment',
+    main_action: 'main action moment',
+    emotion_shift: 'emotional shift or reaction beat',
+    close_up: 'close-up emphasis on the subject',
+    scene_transition: 'scene transition or perspective change',
+    finale: 'finale or closing visual beat',
+    product_highlight: 'product highlight or subject emphasis',
+    background_highlight: 'background or location emphasis',
+    slow_motion: 'slow motion moment',
+    camera_rotation: 'camera rotation around the subject',
+    detail_cut: 'detail-focused insert shot',
+  } as const;
+  const cameraMap = {
+    continuous_shot: 'continuous shot',
+    handheld_cinematic: 'handheld cinematic',
+    tracking_shot: 'tracking shot',
+    drone_wide: 'drone wide',
+    close_up: 'close-up',
+  } as const;
+  const lengthShotMap = {
+    '5s': 3,
+    '8s': 4,
+    '15s': 7,
+    '30s': 10,
+  } as const;
+  const lengthSecondsMap = {
+    '5s': 5,
+    '8s': 8,
+    '15s': 15,
+    '30s': 30,
+  } as const;
 
-  const keywordText = keywords.length > 0 ? keywords.join(', ') : 'short-form, fast pacing, visual storytelling';
-  const title = `영상 프롬프트: ${topic}`;
-  const prompt = `
-당신은 영상 기획자이자 AI 영상 생성 프롬프트 작가입니다.
-아래 입력값을 바탕으로 바로 다른 AI 영상 도구에 넣을 수 있는 완성형 영상 제작 요청문을 작성해 주세요.
+  const topic = form.characterDescription.trim();
+  const background = backgroundMap[form.background];
+  const mood = moodMap[form.mood];
+  const actions = form.actions.length > 0
+    ? form.actions.map((item) => actionMap[item]).join(', ')
+    : 'subtle cinematic movement';
+  const cameras = form.cameraStyles.length > 0
+    ? form.cameraStyles.map((item) => cameraMap[item]).join(', ')
+    : 'continuous shot';
+  const safetyParts = [
+    form.physicsBoost ? 'realistic physics, gravity, weight, inertia' : '',
+    form.objectVisibility ? 'no teleportation, object remains visible' : '',
+    form.identityLock ? 'identity lock, preserve exact face and proportions' : '',
+    form.cameraContinuity ? 'single continuous shot, no cuts, no resets' : '',
+    form.errorPrevention ? 'no body distortion, no face change, no extra limbs, no broken motion' : '',
+    form.styleConsistency ? 'consistent visual style across all shots' : '',
+    form.backgroundConsistency ? 'consistent background continuity across the sequence' : '',
+  ].filter(Boolean);
 
-[입력값]
-- 주제: ${topic}
-- 플랫폼: ${platform}
-- 스타일: ${style}
-- 길이: ${duration}
-- 톤: ${tone}
-- 대상 시청자: ${audience}
-- 구성 형식: ${format}
-- 추가 키워드: ${keywordText}
+  const generateVideoDraftPrompt = () =>
+    `A ${mood} video sequence set in ${background}. ${form.useReferenceImage ? 'Use the provided reference image for the main character identity. ' : ''}The main character is ${topic}. The action includes ${actions}. Camera style: ${cameras}. ${form.dialogueMode === 'custom' && form.dialogue.trim() ? `Optional dialogue: "${form.dialogue.trim()}". ` : ''}${form.extraRequest.trim() ? `Additional direction: ${form.extraRequest.trim()}. ` : ''}`.trim();
 
-[작성 규칙]
-1. 입력값이 비어 있으면 주제에 가장 자연스럽게 어울리는 방향으로 보완한다.
-2. 결과는 설명 없이 바로 사용할 수 있는 요청문 형태로 작성한다.
-3. 초반 3초 안에 시선을 끄는 훅을 포함한다.
-4. 장면 흐름은 시작, 전개, 마무리가 보이도록 자연스럽게 구성한다.
-5. 과한 효과 설명보다 실제 장면이 떠오르는 문장으로 작성한다.
-6. 필요하면 나레이션 톤, 자막 톤, 화면 전환 리듬도 간단히 포함한다.
+  const generateVideoSafetyPrompt = () => safetyParts.join(', ');
 
-[출력 형식]
-Title:
-Concept:
-Video Prompt:
-Scene Flow:
-- Scene 1
-- Scene 2
-- Scene 3
-Optional Narration:
-`.trim();
+  const generateVideoSequencePrompt = () => {
+    const base = generateVideoDraftPrompt();
+    const safety = generateVideoSafetyPrompt();
+    return `${base} The camera follows the character in one cinematic sequence for ${lengthSecondsMap[form.length]} seconds. ${safety}${safety ? ', ' : ''}keep motion readable and visually continuous.`.trim();
+  };
+
+  const shotCount = lengthShotMap[form.length];
+  const totalSeconds = lengthSecondsMap[form.length];
+  const shotLines = Array.from({ length: shotCount }, (_, index) => {
+    const start = ((totalSeconds / shotCount) * index).toFixed(1);
+    const end = ((totalSeconds / shotCount) * (index + 1)).toFixed(1);
+    const actionText =
+      form.actions[index] ? actionMap[form.actions[index]] : form.actions[form.actions.length - 1] ? actionMap[form.actions[form.actions.length - 1]] : 'cinematic movement beat';
+    return `Shot ${index + 1} (${start}–${end}s) — ${actionText}, camera emphasis: ${form.cameraStyles[index % (form.cameraStyles.length || 1)] ? cameraMap[form.cameraStyles[index % form.cameraStyles.length]] : 'continuous shot'}`;
+  });
+
+  const keywords = [
+    purposeLabelMap[form.purpose],
+    form.customBackground.trim() || background,
+    ...form.actions.map((item) => actionMap[item]),
+  ].filter(Boolean);
+
+  const title = `영상 시퀀스 프롬프트: ${topic}`;
+  const prompt = `## 🎬 생성 결과 제목
+
+${title}
+
+## 🧾 입력 요약
+
+- 영상 목적: ${purposeLabelMap[form.purpose]}
+- 레퍼런스 이미지 사용: ${form.useReferenceImage ? '사용' : '미사용'}
+- 배경: ${background}
+- 분위기: ${mood}
+- 액션 흐름: ${actions}
+- 카메라 스타일: ${cameras}
+- 영상 길이: ${totalSeconds}초
+
+## ✍️ 초안 프롬프트
+
+${generateVideoDraftPrompt()}
+
+## 🚀 최종 시퀀스 프롬프트
+
+${generateVideoSequencePrompt()}
+
+## 🎞️ Shot별 구성
+
+${shotLines.join('\n')}
+
+## 🛡️ 안정화 문구
+
+${generateVideoSafetyPrompt() || 'single continuous shot, readable motion, stable character consistency'}
+
+## 📋 복사용 안내
+
+이 결과를 그대로 AI 영상 생성 도구에 붙여넣고, 필요하면 Shot별 구성만 개별 장면 프롬프트로 나눠 사용하세요.`;
 
   return { title, prompt, subTopic: topic, keywords, includeHtml: false };
 };

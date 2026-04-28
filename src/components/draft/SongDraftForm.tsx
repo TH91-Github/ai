@@ -32,6 +32,13 @@ const INSTRUMENT_OPTIONS = [
   { value: 'mixed', label: 'AI 추천 믹스' },
 ];
 
+const LANGUAGE_OPTIONS = [
+  { value: '', label: 'AI 추천' },
+  { value: 'Korean', label: 'Korean' },
+  { value: 'English', label: 'English' },
+  { value: 'Other', label: 'Other' },
+];
+
 const INITIAL_FORM: FormType = {
   purpose: 'youtube_focus',
   topic: '',
@@ -39,9 +46,11 @@ const INITIAL_FORM: FormType = {
   genre: '',
   tempo: '',
   instrument: 'mixed',
+  songLength: 'full',
   gender: 'ai_recommend',
   includeLyrics: true,
   voiceStyle: '',
+  languageOption: '',
   language: '',
   lyricStyle: '',
   keywords: '',
@@ -192,16 +201,34 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
       </div>
 
       <div className={styles.fieldRow}>
-        <Input
-          label="언어"
-          value={form.language}
-          onChange={(e) => setForm((prev) => ({ ...prev, language: e.target.value }))}
-          placeholder="예: 한국어, English, 日本語 (비워두면 AI 추천)"
+        <Select
+          label="언어 선택"
+          options={LANGUAGE_OPTIONS}
+          value={form.languageOption}
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              languageOption: e.target.value as FormType['languageOption'],
+              language: e.target.value === 'Korean' || e.target.value === 'English' ? e.target.value : prev.language,
+            }))
+          }
           fullWidth
           disabled={!form.includeLyrics}
         />
         <Input label="추가 키워드" value={form.keywords} onChange={(e) => setForm((prev) => ({ ...prev, keywords: e.target.value }))} placeholder="쉼표로 구분해 입력" fullWidth />
       </div>
+
+      {form.includeLyrics && form.languageOption === 'Other' && (
+        <div className={styles.fieldRow}>
+          <Input
+            label="기타 언어"
+            value={form.language}
+            onChange={(e) => setForm((prev) => ({ ...prev, language: e.target.value }))}
+            placeholder="예: Japanese, Spanish, French"
+            fullWidth
+          />
+        </div>
+      )}
 
       <div className={styles.fieldRow}>
         <span>기타</span>

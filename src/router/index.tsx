@@ -4,9 +4,12 @@
 // =============================================================
 
 import { createBrowserRouter } from 'react-router-dom';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
 import Layout from '@/components/layout/Layout';
 import DraftPage from '@/pages/DraftPage';
+import LoginPage from '@/pages/LoginPage';
 import RegistryPage from '@/pages/RegistryPage';
+import SignupPage from '@/pages/SignupPage';
 import StatsPage from '@/pages/StatsPage';
 import TempPage from '@/pages/TempPage';
 
@@ -17,9 +20,32 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <DraftPage /> },
       { path: 'draft', element: <DraftPage /> },
-      { path: 'registry', element: <RegistryPage /> },
-      { path: 'stats', element: <StatsPage /> },
-      { path: 'temp', element: <TempPage /> },
+      { path: 'login', element: <LoginPage /> },
+      { path: 'signup', element: <SignupPage /> },
+      {
+        path: 'registry',
+        element: (
+          <ProtectedRoute>
+            <RegistryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'stats',
+        element: (
+          <ProtectedRoute>
+            <StatsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'temp',
+        element: (
+          <ProtectedRoute>
+            <TempPage />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
 ]);

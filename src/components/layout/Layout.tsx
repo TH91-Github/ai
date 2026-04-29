@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Link, NavLink, Outlet } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import styles from './Layout.module.scss';
 
 const NAV_ITEMS = [
@@ -16,6 +17,8 @@ const NAV_ITEMS = [
 ];
 
 const Layout: React.FC = () => {
+  const { user, loading, logout } = useAuth();
+
   return (
     <div className={styles.root}>
       <header className={styles.header}>
@@ -37,6 +40,37 @@ const Layout: React.FC = () => {
               </NavLink>
             ))}
           </nav>
+          <div className={styles.authArea}>
+            {loading ? (
+              <span className={styles.authMuted}>확인 중</span>
+            ) : user ? (
+              <>
+                <span className={styles.userEmail}>{user.email}</span>
+                <button type="button" className={styles.authButton} onClick={logout}>
+                  로그아웃
+                </button>
+              </>
+            ) : (
+              <>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    [styles.authLink, isActive ? styles.authLinkActive : ''].join(' ')
+                  }
+                >
+                  로그인
+                </NavLink>
+                <NavLink
+                  to="/signup"
+                  className={({ isActive }) =>
+                    [styles.authButtonLink, isActive ? styles.authButtonLinkActive : ''].join(' ')
+                  }
+                >
+                  회원가입
+                </NavLink>
+              </>
+            )}
+          </div>
         </div>
       </header>
 

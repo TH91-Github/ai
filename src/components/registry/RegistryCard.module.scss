@@ -29,6 +29,17 @@
   flex-wrap: wrap;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.topic {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
 .date {
   font-size: 0.75rem;
   color: var(--color-text-disabled);
@@ -61,8 +72,49 @@
   color: var(--color-text-muted);
 }
 
+.url {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-text-disabled);
+  word-break: break-all;
+}
+
 .keywords {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  padding-top: 0.15rem;
+}
+
+.editGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .editGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions,
+  .editActions {
+    width: 100%;
+    justify-content: stretch;
+
+    > * {
+      flex: 1;
+    }
+  }
 }

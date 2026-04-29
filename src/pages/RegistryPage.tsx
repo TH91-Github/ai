@@ -19,6 +19,8 @@ import { useToast } from '@/hooks/useToast';
 import type { BlogType } from '@/types';
 import styles from './RegistryPage.module.scss';
 
+type RegistryTab = 'all' | 'blog';
+
 const TYPE_OPTIONS = [
   { value: 'general', label: '일반 주제형' },
   { value: 'history', label: '오늘의 역사형' },
@@ -27,8 +29,9 @@ const TYPE_OPTIONS = [
 ];
 
 const RegistryPage: React.FC = () => {
-  const { items, removeItem, searchItems, addItem } = useRegistryStore();
+  const { items, removeItem, searchItems, addItem, updateItem } = useRegistryStore();
   const [query, setQuery] = useState('');
+  const [tab, setTab] = useState<RegistryTab>('all');
   const [form, setForm] = useState({
     type: 'general' as BlogType,
     title: '',
@@ -44,14 +47,31 @@ const RegistryPage: React.FC = () => {
   }>({});
   const { toasts, show: showToast, remove: removeToast } = useToast();
 
-  const displayed = useMemo(
-    () => searchItems(query),
-    [query, searchItems, items] // items 변경 시 재계산
-  );
+  const displayed = useMemo(() => {
+    const searched = searchItems(query);
+    if (tab === 'blog') {
+      return searched.filter((item) => item.category === 'blog');
+    }
+    return searched;
+  }, [query, searchItems, items, tab]);
 
   const handleDelete = (id: string) => {
     removeItem(id);
     showToast('항목이 삭제되었습니다', 'success');
+  };
+
+  const handleSave = (
+    id: string,
+    updates: {
+      title: string;
+      mainTopic: string;
+      subTopic: string;
+      url: string;
+      keywords: string[];
+    }
+  ) => {
+    updateItem(id, updates);
+    showToast('등록 정보를 수정했습니다', 'success');
   };
 
   const handleRegister = () => {
@@ -113,6 +133,23 @@ const RegistryPage: React.FC = () => {
         <p className={styles.pageDesc}>
           등록된 블로그 글을 관리하고 중복 방지에 활용합니다
         </p>
+      </div>
+
+      <div className={styles.tabs}>
+        <button
+          type="button"
+          className={[styles.tab, tab === 'all' ? styles.active : ''].filter(Boolean).join(' ')}
+          onClick={() => setTab('all')}
+        >
+          전체
+        </button>
+        <button
+          type="button"
+          className={[styles.tab, tab === 'blog' ? styles.active : ''].filter(Boolean).join(' ')}
+          onClick={() => setTab('blog')}
+        >
+          블로그
+        </button>
       </div>
 
       <div className={styles.registerBox}>
@@ -209,7 +246,7 @@ const RegistryPage: React.FC = () => {
       ) : (
         <div className={styles.list}>
           {displayed.map((item) => (
-            <RegistryCard key={item.id} item={item} onDelete={handleDelete} />
+            <RegistryCard key={item.id} item={item} onDelete={handleDelete} onSave={handleSave} />
           ))}
         </div>
       )}

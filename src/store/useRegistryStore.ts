@@ -12,6 +12,10 @@ import { generateId } from '@/utils/promptGenerator';
 interface RegistryStore {
   items: RegistryItem[];
   addItem: (item: Omit<RegistryItem, 'id' | 'createdAt'>) => void;
+  updateItem: (
+    id: string,
+    updates: Pick<RegistryItem, 'title' | 'mainTopic' | 'subTopic' | 'url' | 'keywords'>
+  ) => void;
   removeItem: (id: string) => void;
   searchItems: (query: string) => RegistryItem[];
   getUsedSubTopics: (mainTopic?: string) => string[];
@@ -29,6 +33,19 @@ export const useRegistryStore = create<RegistryStore>()(
           createdAt: new Date().toISOString(),
         };
         set((state) => ({ items: [newItem, ...state.items] }));
+      },
+
+      updateItem: (id, updates) => {
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  ...updates,
+                }
+              : item
+          ),
+        }));
       },
 
       removeItem: (id) => {

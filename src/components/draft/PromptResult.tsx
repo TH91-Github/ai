@@ -43,12 +43,43 @@ const PromptResult: React.FC<Props> = ({
   const [htmlContent, setHtmlContent] = useState('');
   const [showHtmlPanel, setShowHtmlPanel] = useState(false);
 
+  const getCopyText = () => {
+    if (result.songData) {
+      return result.songData.sunoPrompt;
+    }
+
+    return result.prompt;
+  };
+
   const handleCopy = async () => {
+    const text = getCopyText();
+
     try {
-      await navigator.clipboard.writeText(result.prompt);
+      await navigator.clipboard.writeText(text);
       onCopied();
     } catch {
-      onError('클립보드 복사에 실패했습니다. 직접 선택하여 복사해 주세요.');
+      try {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', 'true');
+        textarea.style.position = 'fixed';
+        textarea.style.top = '-9999px';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        const copied = document.execCommand('copy');
+        document.body.removeChild(textarea);
+
+        if (!copied) {
+          throw new Error('copy failed');
+        }
+
+        onCopied();
+      } catch {
+        onError('클립보드 복사에 실패했습니다. 직접 선택하여 복사해 주세요.');
+      }
     }
   };
 

@@ -21,6 +21,36 @@ const MUSIC_PURPOSE_OPTIONS = [
   { value: 'general_music', label: '그 외(기타)' },
 ];
 
+const OUTPUT_TYPE_OPTIONS = [
+  { value: 'song', label: '일반 노래' },
+  { value: 'hook_short', label: '숏츠/릴스 훅' },
+  { value: 'instrumental', label: '연주/BGM' },
+  { value: 'ambience_asmr', label: 'ASMR/환경음' },
+];
+
+const DURATION_OPTIONS = [
+  { value: 'auto', label: 'AI 추천' },
+  { value: 'd15', label: '15초' },
+  { value: 'd30', label: '30초' },
+  { value: 'd60', label: '1분' },
+  { value: 'd180', label: '3분' },
+  { value: 'd210', label: '3분 30초' },
+];
+
+const DISTRIBUTION_OPTIONS = [
+  { value: 'social_only', label: 'SNS 업로드 전용' },
+  { value: 'release_only', label: '음원 등록 전용' },
+  { value: 'social_and_release', label: 'SNS + 음원 등록' },
+];
+
+const VERSION_OPTIONS = [
+  { value: 'original', label: '원곡 버전' },
+  { value: 'short_edit', label: '숏폼 편집 버전' },
+  { value: 'instrumental', label: '연주 버전' },
+  { value: 'acoustic', label: '어쿠스틱 버전' },
+  { value: 'ambient', label: '앰비언트 버전' },
+];
+
 const INSTRUMENT_OPTIONS = [
   { value: 'piano', label: '피아노' },
   { value: 'acoustic_guitar', label: '통기타' },
@@ -29,6 +59,7 @@ const INSTRUMENT_OPTIONS = [
   { value: 'strings', label: '스트링' },
   { value: 'synth_pad', label: '신스 패드' },
   { value: 'jazz_piano', label: '재즈 피아노' },
+  { value: 'ai_recommend_single', label: '요청에 맞게 AI 추천' },
   { value: 'mixed', label: 'AI 추천 믹스' },
 ];
 
@@ -39,20 +70,32 @@ const LANGUAGE_OPTIONS = [
   { value: 'Other', label: 'Other' },
 ];
 
+const LYRIC_DENSITY_OPTIONS = [
+  { value: 'minimal', label: '최소' },
+  { value: 'balanced', label: '균형' },
+  { value: 'dense', label: '촘촘함' },
+];
+
 const INITIAL_FORM: FormType = {
   purpose: 'youtube_focus',
+  outputType: 'song',
+  durationTarget: 'auto',
+  distributionIntent: 'social_only',
+  versionType: 'original',
+  vocalMode: 'with_lyrics',
   topic: '',
   mood: '',
   genre: '',
   tempo: '',
   instrument: 'mixed',
-  songLength: 'full',
   gender: 'ai_recommend',
-  includeLyrics: true,
+  hookStrength: 'medium',
+  loopMode: 'natural_ending',
   voiceStyle: '',
   languageOption: '',
   language: '',
   lyricStyle: '',
+  lyricDensity: 'balanced',
   keywords: '',
   extraNotes: '',
 };
@@ -60,6 +103,11 @@ const INITIAL_FORM: FormType = {
 const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
   const [form, setForm] = useState<FormType>(INITIAL_FORM);
   const [isLoading, setIsLoading] = useState(false);
+
+  const lyricsEnabled =
+    form.vocalMode === 'with_lyrics' || form.vocalMode === 'vocalize_only';
+  const vocalsEnabled = form.vocalMode !== 'instrumental_only' && form.vocalMode !== 'ambience_only';
+  const ambienceMode = form.outputType === 'ambience_asmr' || form.vocalMode === 'ambience_only';
 
   const handleSubmit = async () => {
     if (!form.topic.trim()) {
@@ -83,8 +131,8 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
       <div className={styles.infoBox}>
         <strong>노래 탭 안내</strong>
         <p>
-          Suno AI에 바로 넣을 수 있는 음악 프롬프트와 유튜브 업로드용 제목, 설명, 태그를 함께 생성합니다.
-          Content ID 충돌 가능성을 줄이기 위해 기존 곡과 아티스트 모방을 피하는 안전 문구가 자동으로 포함됩니다.
+          단순한 Suno 문장 생성이 아니라, 구조화 초안부터 AI 정제 요청문, 최종 Suno 프롬프트,
+          유튜브 메타데이터, 배포 안정성 체크까지 한 번에 생성합니다.
         </p>
       </div>
 
@@ -99,6 +147,27 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
 
       <div className={styles.fieldRow}>
         <Select
+          label="결과물 유형"
+          options={OUTPUT_TYPE_OPTIONS}
+          value={form.outputType}
+          onChange={(e) =>
+            setForm((prev) => ({
+              ...prev,
+              outputType: e.target.value as FormType['outputType'],
+              vocalMode:
+                e.target.value === 'ambience_asmr'
+                  ? 'ambience_only'
+                  : e.target.value === 'instrumental'
+                    ? 'instrumental_only'
+                    : prev.vocalMode,
+            }))
+          }
+          fullWidth
+        />
+      </div>
+
+      <div className={styles.fieldRow}>
+        <Select
           label="음악 목적"
           options={MUSIC_PURPOSE_OPTIONS}
           value={form.purpose}
@@ -108,12 +177,36 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
       </div>
 
       <div className={styles.fieldRow}>
-        <Input label="주제" value={form.topic} onChange={(e) => setForm((prev) => ({ ...prev, topic: e.target.value }))} placeholder="예: 비 오는 날, 퇴근길, 요리하는 아침" fullWidth />
-        <Input label="분위기" value={form.mood} onChange={(e) => setForm((prev) => ({ ...prev, mood: e.target.value }))} placeholder="예: 따뜻함, 희망, 편안함" fullWidth />
+        <Select
+          label="길이 목표"
+          options={DURATION_OPTIONS}
+          value={form.durationTarget}
+          onChange={(e) => setForm((prev) => ({ ...prev, durationTarget: e.target.value as FormType['durationTarget'] }))}
+          fullWidth
+        />
+        <Select
+          label="배포 의도"
+          options={DISTRIBUTION_OPTIONS}
+          value={form.distributionIntent}
+          onChange={(e) => setForm((prev) => ({ ...prev, distributionIntent: e.target.value as FormType['distributionIntent'] }))}
+          fullWidth
+        />
       </div>
 
       <div className={styles.fieldRow}>
-        <Input label="장르" value={form.genre} onChange={(e) => setForm((prev) => ({ ...prev, genre: e.target.value }))} placeholder="예: lofi, K-pop ballad, acoustic pop, cafe jazz, ambient" fullWidth />
+        <Select
+          label="버전 타입"
+          options={VERSION_OPTIONS}
+          value={form.versionType}
+          onChange={(e) => setForm((prev) => ({ ...prev, versionType: e.target.value as FormType['versionType'] }))}
+          fullWidth
+        />
+        <Input label="주제" value={form.topic} onChange={(e) => setForm((prev) => ({ ...prev, topic: e.target.value }))} placeholder="예: 비 오는 날, 퇴근길, 요리하는 아침" fullWidth />
+        <Input label="분위기" value={form.mood} onChange={(e) => setForm((prev) => ({ ...prev, mood: e.target.value }))} placeholder="예: 따뜻함, 희망, 편안함, 고요함" fullWidth />
+      </div>
+
+      <div className={styles.fieldRow}>
+        <Input label="장르" value={form.genre} onChange={(e) => setForm((prev) => ({ ...prev, genre: e.target.value }))} placeholder="예: lofi, acoustic pop, cafe jazz, ambient rain" fullWidth />
         <Input label="템포" value={form.tempo} onChange={(e) => setForm((prev) => ({ ...prev, tempo: e.target.value }))} placeholder="예: 70-85 BPM, 느리게, 미디엄 템포" fullWidth />
       </div>
 
@@ -128,23 +221,25 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
       </div>
 
       <div className={styles.fieldRow}>
-        <span>가사</span>
+        <span>보컬/사운드 방식</span>
         <div className={styles.radioGroup}>
           {[
-            { value: 'yes', label: '가사 있음' },
-            { value: 'no', label: '가사 없음' },
+            { value: 'with_lyrics', label: '가사 포함' },
+            { value: 'vocalize_only', label: '허밍/보컬라이즈' },
+            { value: 'instrumental_only', label: '무보컬 연주' },
+            { value: 'ambience_only', label: '환경음 전용' },
           ].map((option) => (
             <label key={option.value} className={styles.radioLabel}>
               <input
                 className={styles.radioInput}
                 type="radio"
-                name="song-lyrics"
+                name="song-vocal-mode"
                 value={option.value}
-                checked={form.includeLyrics === (option.value === 'yes')}
+                checked={form.vocalMode === option.value}
                 onChange={() =>
                   setForm((prev) => ({
                     ...prev,
-                    includeLyrics: option.value === 'yes',
+                    vocalMode: option.value as FormType['vocalMode'],
                   }))
                 }
               />
@@ -156,7 +251,7 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
 
       <div className={styles.fieldRow}>
         <span>보컬 성별</span>
-        <div className={`${styles.radioGroup} ${!form.includeLyrics ? styles.disabledGroup : ''}`}>
+        <div className={`${styles.radioGroup} ${!vocalsEnabled ? styles.disabledGroup : ''}`}>
           {[
             { value: 'female', label: '여성' },
             { value: 'male', label: '남성' },
@@ -170,7 +265,7 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
                 name="song-gender"
                 value={option.value}
                 checked={form.gender === option.value}
-                disabled={!form.includeLyrics}
+                disabled={!vocalsEnabled}
                 onChange={(e) => setForm((prev) => ({ ...prev, gender: e.target.value as FormType['gender'] }))}
               />
               <span>{option.label}</span>
@@ -179,7 +274,51 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
         </div>
       </div>
 
-      
+      <div className={styles.fieldRow}>
+        <span>훅 강도</span>
+        <div className={`${styles.radioGroup} ${form.outputType !== 'hook_short' ? styles.disabledGroup : ''}`}>
+          {[
+            { value: 'low', label: '낮음' },
+            { value: 'medium', label: '보통' },
+            { value: 'high', label: '강함' },
+          ].map((option) => (
+            <label key={option.value} className={styles.radioLabel}>
+              <input
+                className={styles.radioInput}
+                type="radio"
+                name="song-hook-strength"
+                value={option.value}
+                checked={form.hookStrength === option.value}
+                disabled={form.outputType !== 'hook_short'}
+                onChange={(e) => setForm((prev) => ({ ...prev, hookStrength: e.target.value as FormType['hookStrength'] }))}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.fieldRow}>
+        <span>마무리 방식</span>
+        <div className={styles.radioGroup}>
+          {[
+            { value: 'loopable', label: '루프형' },
+            { value: 'natural_ending', label: '자연 종료형' },
+          ].map((option) => (
+            <label key={option.value} className={styles.radioLabel}>
+              <input
+                className={styles.radioInput}
+                type="radio"
+                name="song-loop-mode"
+                value={option.value}
+                checked={form.loopMode === option.value}
+                onChange={(e) => setForm((prev) => ({ ...prev, loopMode: e.target.value as FormType['loopMode'] }))}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
 
       <div className={styles.fieldRow}>
         <Input
@@ -188,7 +327,7 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
           onChange={(e) => setForm((prev) => ({ ...prev, voiceStyle: e.target.value }))}
           placeholder="예: 부드럽게, 담백하게, 속삭이듯"
           fullWidth
-          disabled={!form.includeLyrics}
+          disabled={!vocalsEnabled}
         />
         <Input
           label="가사 스타일"
@@ -196,7 +335,7 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
           onChange={(e) => setForm((prev) => ({ ...prev, lyricStyle: e.target.value }))}
           placeholder="예: 일상적, 감성적, 쉬운 문장"
           fullWidth
-          disabled={!form.includeLyrics}
+          disabled={!lyricsEnabled}
         />
       </div>
 
@@ -204,21 +343,32 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
         <Select
           label="언어 선택"
           options={LANGUAGE_OPTIONS}
-          value={form.languageOption}
-          onChange={(e) =>
-            setForm((prev) => ({
-              ...prev,
-              languageOption: e.target.value as FormType['languageOption'],
-              language: e.target.value === 'Korean' || e.target.value === 'English' ? e.target.value : prev.language,
-            }))
-          }
+            value={form.languageOption}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                languageOption: e.target.value as FormType['languageOption'],
+                language: e.target.value === 'Korean' || e.target.value === 'English' ? e.target.value : prev.language,
+              }))
+            }
+            fullWidth
+            disabled={!vocalsEnabled}
+          />
+        <Select
+          label="가사 밀도"
+          options={LYRIC_DENSITY_OPTIONS}
+          value={form.lyricDensity}
+          onChange={(e) => setForm((prev) => ({ ...prev, lyricDensity: e.target.value as FormType['lyricDensity'] }))}
           fullWidth
-          disabled={!form.includeLyrics}
+          disabled={!lyricsEnabled}
         />
+      </div>
+
+      <div className={styles.fieldRow}>
         <Input label="추가 키워드" value={form.keywords} onChange={(e) => setForm((prev) => ({ ...prev, keywords: e.target.value }))} placeholder="쉼표로 구분해 입력" fullWidth />
       </div>
 
-      {form.includeLyrics && form.languageOption === 'Other' && (
+      {vocalsEnabled && form.languageOption === 'Other' && (
         <div className={styles.fieldRow}>
           <Input
             label="기타 언어"
@@ -236,7 +386,11 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
           className={styles.textarea}
           value={form.extraNotes}
           onChange={(e) => setForm((prev) => ({ ...prev, extraNotes: e.target.value }))}
-          placeholder="감정, 장르, 보컬 느낌, 참고하고 싶은 방향을 자유롭게 설명해 주세요. 이 내용이 있으면 위 입력값보다 우선해서 반영합니다."
+          placeholder={
+            ambienceMode
+              ? '예: 빗소리와 카페 컵 소리 중심, 멜로디 없음, 조용한 새벽 느낌'
+              : '예: 첫 1초 훅 강조, 통기타 피크 긁는 소리, 후렴 반복, 브이로그 편집 친화적'
+          }
         />
       </div>
 

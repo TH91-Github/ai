@@ -23,11 +23,41 @@ export type InstrumentType =
   | 'strings'
   | 'synth_pad'
   | 'jazz_piano'
+  | 'ai_recommend_single'
   | 'mixed';
 export type LyricsMode = 'with_lyrics' | 'no_lyrics';
 export type VocalGender = 'female' | 'male' | 'mixed' | 'ai_recommend';
-export type SongLength = 'short' | 'medium' | 'full';
 export type SongLanguageOption = 'Korean' | 'English' | 'Other' | '';
+export type SongOutputType =
+  | 'song'
+  | 'hook_short'
+  | 'instrumental'
+  | 'ambience_asmr';
+export type SongDurationTarget =
+  | 'd15'
+  | 'd30'
+  | 'd60'
+  | 'd180'
+  | 'd210'
+  | 'auto';
+export type SongDistributionIntent =
+  | 'social_only'
+  | 'release_only'
+  | 'social_and_release';
+export type SongVersionType =
+  | 'original'
+  | 'short_edit'
+  | 'instrumental'
+  | 'acoustic'
+  | 'ambient';
+export type SongVocalMode =
+  | 'with_lyrics'
+  | 'vocalize_only'
+  | 'instrumental_only'
+  | 'ambience_only';
+export type HookStrength = 'low' | 'medium' | 'high';
+export type LoopMode = 'loopable' | 'natural_ending';
+export type LyricDensity = 'minimal' | 'balanced' | 'dense';
 export type VideoPurpose =
   | 'shorts'
   | 'movie_trailer'
@@ -90,34 +120,77 @@ export interface HistoryDraftForm {
 // ── 노래 프롬프트 입력 폼 ─────────────────────────────────────
 export interface SongDraftForm {
   purpose: MusicPurpose;
+  outputType: SongOutputType;
+  durationTarget: SongDurationTarget;
+  distributionIntent: SongDistributionIntent;
+  versionType: SongVersionType;
+  vocalMode: SongVocalMode;
   topic: string;
   mood: string;
   genre: string;
   tempo: string;
   instrument: InstrumentType;
-  songLength: SongLength;
-  includeLyrics: boolean;
   gender: VocalGender;
+  hookStrength: HookStrength;
+  loopMode: LoopMode;
   voiceStyle: string;
   languageOption: SongLanguageOption;
   language: string;
   lyricStyle: string;
+  lyricDensity: LyricDensity;
   keywords: string;
   extraNotes: string;
 }
 
+export interface SongPromptDraft {
+  outputType: SongOutputType;
+  durationTarget: SongDurationTarget;
+  distributionIntent: SongDistributionIntent;
+  versionType: SongVersionType;
+  vocalMode: SongVocalMode;
+  topic: string;
+  purpose: string;
+  mood: string[];
+  genre: string[];
+  instrumentation: string[];
+  bpm?: string;
+  hookStrength?: HookStrength;
+  loopMode?: LoopMode;
+  vocalProfile?: {
+    gender?: string;
+    tone?: string;
+    style?: string;
+    language?: string;
+  };
+  lyricProfile?: {
+    style?: string;
+    density?: LyricDensity;
+    hookRepeat?: boolean;
+  };
+  arrangementNotes: string[];
+  negativeConstraints: string[];
+  safetyNotes: string[];
+  distributionSafetyNotes: string[];
+}
+
 export interface SongPromptInput {
   purpose: MusicPurpose;
+  outputType: SongOutputType;
+  durationTarget: SongDurationTarget;
+  distributionIntent: SongDistributionIntent;
+  versionType: SongVersionType;
+  vocalMode: SongVocalMode;
   topic: string;
   mood: string;
   genre: string;
   tempo: string;
   instrument: InstrumentType;
-  songLength: SongLength;
-  lyricsMode: LyricsMode;
   vocalGender: VocalGender;
+  hookStrength: HookStrength;
+  loopMode: LoopMode;
   vocalStyle: string;
   lyricStyle: string;
+  lyricDensity: LyricDensity;
   language: string;
   keywords: string;
   extra: string;
@@ -128,20 +201,30 @@ export interface SavedSongPrompt {
   type: 'song';
   createdAt: number;
   input: SongPromptInput;
-  sunoPrompt: string;
+  draftPrompt: string;
+  refinementPrompt: string;
+  finalSunoPrompt: string;
   youtubeTitles: string[];
   youtubeDescription: string;
-  youtubeTags: string;
+  tagRequestPrompt: string;
+  contentIdWarning: string;
 }
 
 export interface SongGeneratedData {
+  draft: SongPromptDraft;
   input: SongPromptInput;
-  sunoPrompt: string;
-  koreanPrompt: string;
+  draftPrompt: string;
+  refinementPrompt: string;
+  finalSunoPrompt: string;
+  descriptionKo: string;
   youtubeTitles: string[];
   youtubeDescription: string;
-  youtubeTags: string;
-  contentIdNotes: string[];
+  tagRequestPrompt: string;
+  contentIdChecks: string[];
+  distributionSafetyCheck: string[];
+  preReleaseChecklist: string[];
+  contentIdWarning: string;
+  metadataNamingCaution: string[];
 }
 
 // ── 영상 프롬프트 입력 폼 ─────────────────────────────────────

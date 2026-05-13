@@ -4,60 +4,47 @@
 // 주의: 이 파일은 런타임 값을 포함하지 않음 (순수 타입만)
 // =============================================================
 
+import type {
+  HookStrength,
+  InstrumentType,
+  LoopMode,
+  LyricDensity,
+  MusicPromptDraft as FeatureSongPromptDraft,
+  MusicPromptFormValues as FeatureSongDraftForm,
+  MusicPromptInput as FeatureSongPromptInput,
+  MusicPromptResult as FeatureSongGeneratedData,
+  MusicPurpose,
+  SongDistributionIntent,
+  SongDurationTarget,
+  SongLanguageOption,
+  SongOutputType,
+  SongVersionType,
+  SongVocalMode,
+  VocalGender,
+} from '@/features/musicPrompt/types';
+export type {
+  HookStrength,
+  InstrumentType,
+  LoopMode,
+  LyricDensity,
+  MusicPurpose,
+  SongDistributionIntent,
+  SongDurationTarget,
+  SongLanguageOption,
+  SongOutputType,
+  SongVersionType,
+  SongVocalMode,
+  VocalGender,
+};
+export type SongPromptDraft = FeatureSongPromptDraft;
+export type SongDraftForm = FeatureSongDraftForm;
+export type SongPromptInput = FeatureSongPromptInput;
+export type SongGeneratedData = FeatureSongGeneratedData;
+
 // ── 블로그 카테고리 타입 ──────────────────────────────────────
 export type BlogType = 'general' | 'history' | 'song' | 'video';
 export type ToneType = 'blog' | 'info';
-export type MusicPurpose =
-  | 'youtube_focus'
-  | 'cooking_bgm'
-  | 'daily_listen'
-  | 'emotional_playlist'
-  | 'cafe_bgm'
-  | 'shorts_bgm'
-  | 'general_music';
-export type InstrumentType =
-  | 'piano'
-  | 'acoustic_guitar'
-  | 'electric_guitar'
-  | 'lofi_keys'
-  | 'strings'
-  | 'synth_pad'
-  | 'jazz_piano'
-  | 'ai_recommend_single'
-  | 'mixed';
 export type LyricsMode = 'with_lyrics' | 'no_lyrics';
-export type VocalGender = 'female' | 'male' | 'mixed' | 'ai_recommend';
-export type SongLanguageOption = 'Korean' | 'English' | 'Other' | '';
-export type SongOutputType =
-  | 'song'
-  | 'hook_short'
-  | 'instrumental'
-  | 'ambience_asmr';
-export type SongDurationTarget =
-  | 'd15'
-  | 'd30'
-  | 'd60'
-  | 'd180'
-  | 'd210'
-  | 'auto';
-export type SongDistributionIntent =
-  | 'social_only'
-  | 'release_only'
-  | 'social_and_release';
-export type SongVersionType =
-  | 'original'
-  | 'short_edit'
-  | 'instrumental'
-  | 'acoustic'
-  | 'ambient';
-export type SongVocalMode =
-  | 'with_lyrics'
-  | 'vocalize_only'
-  | 'instrumental_only'
-  | 'ambience_only';
-export type HookStrength = 'low' | 'medium' | 'high';
-export type LoopMode = 'loopable' | 'natural_ending';
-export type LyricDensity = 'minimal' | 'balanced' | 'dense';
 export type VideoPurpose =
   | 'shorts'
   | 'movie_trailer'
@@ -117,90 +104,15 @@ export interface HistoryDraftForm {
   includeImage: boolean;
 }
 
-// ── 노래 프롬프트 입력 폼 ─────────────────────────────────────
-export interface SongDraftForm {
-  purpose: MusicPurpose;
-  outputType: SongOutputType;
-  durationTarget: SongDurationTarget;
-  distributionIntent: SongDistributionIntent;
-  versionType: SongVersionType;
-  vocalMode: SongVocalMode;
-  topic: string;
-  mood: string;
-  genre: string;
-  tempo: string;
-  instrument: InstrumentType;
-  gender: VocalGender;
-  hookStrength: HookStrength;
-  loopMode: LoopMode;
-  voiceStyle: string;
-  languageOption: SongLanguageOption;
-  language: string;
-  lyricStyle: string;
-  lyricDensity: LyricDensity;
-  keywords: string;
-  extraNotes: string;
-}
-
-export interface SongPromptDraft {
-  outputType: SongOutputType;
-  durationTarget: SongDurationTarget;
-  distributionIntent: SongDistributionIntent;
-  versionType: SongVersionType;
-  vocalMode: SongVocalMode;
-  topic: string;
-  purpose: string;
-  mood: string[];
-  genre: string[];
-  instrumentation: string[];
-  bpm?: string;
-  hookStrength?: HookStrength;
-  loopMode?: LoopMode;
-  vocalProfile?: {
-    gender?: string;
-    tone?: string;
-    style?: string;
-    language?: string;
-  };
-  lyricProfile?: {
-    style?: string;
-    density?: LyricDensity;
-    hookRepeat?: boolean;
-  };
-  arrangementNotes: string[];
-  negativeConstraints: string[];
-  safetyNotes: string[];
-  distributionSafetyNotes: string[];
-}
-
-export interface SongPromptInput {
-  purpose: MusicPurpose;
-  outputType: SongOutputType;
-  durationTarget: SongDurationTarget;
-  distributionIntent: SongDistributionIntent;
-  versionType: SongVersionType;
-  vocalMode: SongVocalMode;
-  topic: string;
-  mood: string;
-  genre: string;
-  tempo: string;
-  instrument: InstrumentType;
-  vocalGender: VocalGender;
-  hookStrength: HookStrength;
-  loopMode: LoopMode;
-  vocalStyle: string;
-  lyricStyle: string;
-  lyricDensity: LyricDensity;
-  language: string;
-  keywords: string;
-  extra: string;
-}
-
 export interface SavedSongPrompt {
   id: string;
   type: 'song';
   createdAt: number;
   input: SongPromptInput;
+  stylePrompt: string;
+  expandedProductionNotes: string;
+  lyricsAndStructure: string;
+  uniquenessStrategy: string[];
   draftPrompt: string;
   refinementPrompt: string;
   finalSunoPrompt: string;
@@ -208,23 +120,6 @@ export interface SavedSongPrompt {
   youtubeDescription: string;
   tagRequestPrompt: string;
   contentIdWarning: string;
-}
-
-export interface SongGeneratedData {
-  draft: SongPromptDraft;
-  input: SongPromptInput;
-  draftPrompt: string;
-  refinementPrompt: string;
-  finalSunoPrompt: string;
-  descriptionKo: string;
-  youtubeTitles: string[];
-  youtubeDescription: string;
-  tagRequestPrompt: string;
-  contentIdChecks: string[];
-  distributionSafetyCheck: string[];
-  preReleaseChecklist: string[];
-  contentIdWarning: string;
-  metadataNamingCaution: string[];
 }
 
 // ── 영상 프롬프트 입력 폼 ─────────────────────────────────────

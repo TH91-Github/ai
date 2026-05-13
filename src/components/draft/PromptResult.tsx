@@ -43,15 +43,58 @@ const PromptResult: React.FC<Props> = ({
   const [htmlContent, setHtmlContent] = useState('');
   const [showHtmlPanel, setShowHtmlPanel] = useState(false);
 
-  const getCopyText = (mode: 'default' | 'draft' | 'refinement' | 'final' | 'full' = 'default') => {
-    if (result.songData) {
-      if (mode === 'draft') return result.songData.draftPrompt;
-      if (mode === 'refinement') return result.songData.refinementPrompt;
-      if (mode === 'final' || mode === 'default') return result.songData.finalSunoPrompt;
-      if (mode === 'full') return result.prompt;
-    }
+  const getCopyText = () => {
+    if (!result.songData) return result.prompt;
 
-    return result.prompt;
+    return [
+      'Style Prompt',
+      result.songData.stylePrompt,
+      '',
+      'Expanded Production Notes',
+      result.songData.expandedProductionNotes,
+      '',
+      'Lyrics & Structure',
+      result.songData.lyricsAndStructure,
+      '',
+      'Uniqueness Strategy',
+      ...result.songData.uniquenessStrategy.map((item) => `- ${item}`),
+      '',
+      '내부 구조 초안',
+      result.songData.draftPrompt,
+      '',
+      'AI 정제 요청문',
+      result.songData.refinementPrompt,
+      '',
+      'Suno 확장 프롬프트',
+      result.songData.finalSunoPrompt,
+      '',
+      '설명',
+      result.songData.descriptionKo,
+      '',
+      'Content ID 체크',
+      ...result.songData.contentIdChecks.map((item) => `- ${item}`),
+      '',
+      '배포 안정성 체크',
+      ...result.songData.distributionSafetyCheck.map((item) => `- ${item}`),
+      '',
+      'Content ID 주의 문구',
+      result.songData.contentIdWarning,
+      '',
+      '유튜브 제목 추천',
+      ...result.songData.youtubeTitles.map((item, index) => `${index + 1}. ${item}`),
+      '',
+      '유튜브 설명 초안',
+      result.songData.youtubeDescription,
+      '',
+      '태그 추천',
+      result.songData.tagRequestPrompt,
+      '',
+      '음원 등록 전 체크리스트',
+      ...result.songData.preReleaseChecklist.map((item) => `- ${item}`),
+      '',
+      '메타데이터 작성 주의사항',
+      ...result.songData.metadataNamingCaution.map((item) => `- ${item}`),
+    ].join('\n');
   };
 
   const copyText = async (text: string) => {
@@ -128,6 +171,10 @@ const PromptResult: React.FC<Props> = ({
               type: 'song',
               createdAt: Date.now(),
               input: result.songData.input,
+              stylePrompt: result.songData.stylePrompt,
+              expandedProductionNotes: result.songData.expandedProductionNotes,
+              lyricsAndStructure: result.songData.lyricsAndStructure,
+              uniquenessStrategy: result.songData.uniquenessStrategy,
               draftPrompt: result.songData.draftPrompt,
               refinementPrompt: result.songData.refinementPrompt,
               finalSunoPrompt: result.songData.finalSunoPrompt,
@@ -162,38 +209,47 @@ const PromptResult: React.FC<Props> = ({
       <div className={styles.promptBox}>
         {result.songData ? (
           <div className={styles.songSections}>
-            <div className={styles.songCopyActions}>
-              <Button variant="secondary" size="sm" type="button" onClick={() => copyText(getCopyText('draft'))}>
-                1차 초안 복사
-              </Button>
-              <Button variant="secondary" size="sm" type="button" onClick={() => copyText(getCopyText('refinement'))}>
-                AI 정제 요청문 복사
-              </Button>
-              <Button variant="primary" size="sm" type="button" onClick={() => copyText(getCopyText('final'))}>
-                최종 Suno 복사
-              </Button>
-              <Button variant="ghost" size="sm" type="button" onClick={() => copyText(getCopyText('full'))}>
-                전체 결과 복사
-              </Button>
-            </div>
+            <section className={styles.songSection}>
+              <h4>🎯 Style Prompt</h4>
+              <pre className={styles.promptText}>{result.songData.stylePrompt}</pre>
+            </section>
 
             <section className={styles.songSection}>
-              <h4>🧩 1차 구조화 초안</h4>
+              <h4>🎚 Expanded Production Notes</h4>
+              <pre className={styles.promptText}>{result.songData.expandedProductionNotes}</pre>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>🧱 Lyrics & Structure</h4>
+              <pre className={styles.promptText}>{result.songData.lyricsAndStructure}</pre>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>🧭 Uniqueness Strategy</h4>
+              <ul className={styles.songList}>
+                {result.songData.uniquenessStrategy.map((note) => (
+                  <li key={note}>{note}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className={styles.songSection}>
+              <h4>🧩 내부 구조 초안</h4>
               <pre className={styles.promptText}>{result.songData.draftPrompt}</pre>
             </section>
 
             <section className={styles.songSection}>
-              <h4>🛠️ 일반 AI 정제 요청문</h4>
+              <h4>🛠 AI 정제 요청문</h4>
               <pre className={styles.promptText}>{result.songData.refinementPrompt}</pre>
             </section>
 
             <section className={styles.songSection}>
-              <h4>🎵 최종 Suno AI 프롬프트</h4>
+              <h4>🎵 Suno 확장 프롬프트</h4>
               <pre className={styles.promptText}>{result.songData.finalSunoPrompt}</pre>
             </section>
 
             <section className={styles.songSection}>
-              <h4>🇰🇷 한국어 설명</h4>
+              <h4>🇰🇷 설명</h4>
               <p className={styles.songCopy}>{result.songData.descriptionKo}</p>
             </section>
 

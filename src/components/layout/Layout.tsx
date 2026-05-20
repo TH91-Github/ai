@@ -60,14 +60,6 @@ const Layout: React.FC = () => {
                 >
                   로그인
                 </NavLink>
-                <NavLink
-                  to="/signup"
-                  className={({ isActive }) =>
-                    [styles.authButtonLink, isActive ? styles.authButtonLinkActive : ''].join(' ')
-                  }
-                >
-                  회원가입
-                </NavLink>
               </>
             )}
           </div>

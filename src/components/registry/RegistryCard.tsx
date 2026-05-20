@@ -8,19 +8,19 @@ import React, { useMemo, useState } from 'react';
 import Badge from '@/components/common/Badge';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
-import type { RegistryItem } from '@/types';
+import type { BlogRegistryItem } from '@/types';
 import styles from './RegistryCard.module.scss';
 
 interface Props {
-  item: RegistryItem;
+  item: BlogRegistryItem;
   onDelete: (id: string) => void;
   onSave: (
     id: string,
-    updates: Pick<RegistryItem, 'title' | 'mainTopic' | 'subTopic' | 'url' | 'keywords'>
+    updates: Pick<BlogRegistryItem, 'title' | 'mainTopic' | 'subTopic' | 'url' | 'keywords'>
   ) => void;
 }
 
-const TYPE_LABELS: Record<RegistryItem['type'], string> = {
+const TYPE_LABELS: Record<BlogRegistryItem['type'], string> = {
   general: '일반 주제형',
   history: '오늘의 역사형',
   song: '노래',
@@ -105,6 +105,7 @@ const RegistryCard: React.FC<Props> = ({ item, onDelete, onSave }) => {
     month: '2-digit',
     day: '2-digit',
   });
+  const previewKeywords = item.keywords.slice(0, 3);
 
   return (
     <div className={styles.card}>
@@ -189,18 +190,25 @@ const RegistryCard: React.FC<Props> = ({ item, onDelete, onSave }) => {
                 item.title
               )}
             </p>
-            <p className={styles.subTopic}>세부 주제: {item.subTopic}</p>
-            <p className={styles.url}>
-              URL: {item.url ? item.url : '아직 입력되지 않음'}
-            </p>
+            <p className={styles.subTopic}>{item.subTopic}</p>
           </div>
 
-          <div className={styles.keywords}>
-            {item.keywords.map((kw) => (
-              <Badge key={kw} color="neutral">
-                {kw}
-              </Badge>
-            ))}
+          <div className={styles.footerRow}>
+            <div className={styles.keywords}>
+              {previewKeywords.map((kw) => (
+                <Badge key={kw} color="neutral">
+                  {kw}
+                </Badge>
+              ))}
+              {item.keywords.length > previewKeywords.length && (
+                <span className={styles.moreKeywords}>+{item.keywords.length - previewKeywords.length}</span>
+              )}
+            </div>
+            {item.url && (
+              <a href={item.url} target="_blank" rel="noopener noreferrer" className={styles.linkText}>
+                링크
+              </a>
+            )}
           </div>
         </>
       )}

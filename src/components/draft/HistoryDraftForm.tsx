@@ -7,11 +7,11 @@
 //   - 프롬프트 생성
 // =============================================================
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Input from '@/components/common/Input';
 import Toggle from '@/components/common/Toggle';
 import Button from '@/components/common/Button';
-import type { HistoryDraftForm as FormType, GeneratedPrompt } from '@/types';
+import type { BlogRegistryItem, HistoryDraftForm as FormType, GeneratedPrompt } from '@/types';
 import { generateHistoryPrompt, getMaxNextMonthString, getTodayString } from '@/utils/promptGenerator';
 import { useRegistryStore } from '@/store/useRegistryStore';
 import styles from './DraftForm.module.scss';
@@ -22,7 +22,7 @@ interface Props {
 }
 
 const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
-  const { items } = useRegistryStore();
+  const { items, fetchItems } = useRegistryStore();
   const [form, setForm] = useState<FormType>({
     date: getTodayString(),
     koreaFirst: true,
@@ -31,6 +31,12 @@ const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ date?: string }>({});
+
+  useEffect(() => {
+    fetchItems('blog').catch(() => {
+      // 중복 히스토리 참고 목록을 못 불러와도 프롬프트 생성은 가능하게 둡니다.
+    });
+  }, [fetchItems]);
 
   const validate = (): boolean => {
     if (!form.date) {
@@ -46,7 +52,7 @@ const HistoryDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
     setIsLoading(true);
     try {
       const usedHistoryTopics = items
-        .filter((item) => item.type === 'history')
+        .filter((item): item is BlogRegistryItem => item.category === 'blog' && item.type === 'history')
         .flatMap((item) => [item.title, item.subTopic])
         .filter(Boolean);
 

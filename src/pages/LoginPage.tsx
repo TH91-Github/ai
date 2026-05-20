@@ -4,7 +4,7 @@
 // =============================================================
 
 import React, { useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { useAuth } from '@/contexts/AuthContext';
@@ -90,9 +90,7 @@ const LoginPage: React.FC = () => {
           </Button>
         </form>
 
-        <p className={styles.switchText}>
-          계정이 없나요? <Link to="/signup">회원가입</Link>
-        </p>
+        <p className={styles.switchText}>관리자 계정으로 로그인해 주세요.</p>
       </div>
     </section>
   );

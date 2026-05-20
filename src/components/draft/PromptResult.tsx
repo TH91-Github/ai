@@ -13,10 +13,13 @@
 import React, { useState } from 'react';
 import Button from '@/components/common/Button';
 import Badge from '@/components/common/Badge';
+import DuplicateUrlModal from '@/components/common/DuplicateUrlModal';
 import Input from '@/components/common/Input';
 import type { GeneratedPrompt, BlogType } from '@/types';
 import { useRegistryStore } from '@/store/useRegistryStore';
 import styles from './PromptResult.module.scss';
+
+const normalizeUrl = (value: string) => value.trim().toLowerCase().replace(/\/+$/, '');
 
 interface Props {
   result: GeneratedPrompt;
@@ -35,9 +38,14 @@ const PromptResult: React.FC<Props> = ({
   onCopied,
   onError,
 }) => {
-  const { addItem } = useRegistryStore();
+  const { items, fetchItems, addBlogItem, addSongItem } = useRegistryStore();
   const [url, setUrl] = useState('');
   const [isSaved, setIsSaved] = useState(false);
+  const [duplicateModal, setDuplicateModal] = useState<{
+    open: boolean;
+    matchedTitle?: string;
+    matchedUrl?: string;
+  }>({ open: false });
 
   // HTML 다운로드용: AI 응답 결과를 붙여넣는 textarea
   const [htmlContent, setHtmlContent] = useState('');
@@ -154,37 +162,68 @@ const PromptResult: React.FC<Props> = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isSaved) return;
     try {
-      addItem({
-        category: 'blog',
-        type,
-        mainTopic,
-        subTopic: result.subTopic,
-        title: result.title,
-        url: url.trim(),
-        keywords: result.keywords,
-        songData: result.songData
-          ? {
-              id: crypto.randomUUID?.() ?? `${Date.now()}`,
-              type: 'song',
-              createdAt: Date.now(),
-              input: result.songData.input,
-              stylePrompt: result.songData.stylePrompt,
-              expandedProductionNotes: result.songData.expandedProductionNotes,
-              lyricsAndStructure: result.songData.lyricsAndStructure,
-              uniquenessStrategy: result.songData.uniquenessStrategy,
-              draftPrompt: result.songData.draftPrompt,
-              refinementPrompt: result.songData.refinementPrompt,
-              finalSunoPrompt: result.songData.finalSunoPrompt,
-              youtubeTitles: result.songData.youtubeTitles,
-              youtubeDescription: result.songData.youtubeDescription,
-              tagRequestPrompt: result.songData.tagRequestPrompt,
-              contentIdWarning: result.songData.contentIdWarning,
-            }
-          : undefined,
-      });
+      const targetCategory = type === 'song' ? 'song' : 'blog';
+      await fetchItems(targetCategory, true);
+      const normalizedUrl = normalizeUrl(url);
+      if (normalizedUrl) {
+        const duplicateItem = useRegistryStore
+          .getState()
+          .items
+          .filter((item) => item.category === targetCategory)
+          .find((item) => normalizeUrl(item.url) === normalizedUrl);
+
+        if (duplicateItem) {
+          setDuplicateModal({
+            open: true,
+            matchedTitle: duplicateItem.title,
+            matchedUrl: duplicateItem.url,
+          });
+          return;
+        }
+      }
+
+      if (type === 'song' && result.songData) {
+        await addSongItem({
+          category: 'song',
+          title: result.title,
+          status: 'unregistered',
+          promptText: getCopyText(),
+          url: url.trim(),
+        });
+      } else {
+        await addBlogItem({
+          category: 'blog',
+          type,
+          mainTopic,
+          subTopic: result.subTopic,
+          title: result.title,
+          url: url.trim(),
+          keywords: result.keywords,
+          songData: result.songData
+            ? {
+                id: crypto.randomUUID?.() ?? `${Date.now()}`,
+                type: 'song',
+                createdAt: Date.now(),
+                input: result.songData.input,
+                stylePrompt: result.songData.stylePrompt,
+                expandedProductionNotes: result.songData.expandedProductionNotes,
+                lyricsAndStructure: result.songData.lyricsAndStructure,
+                uniquenessStrategy: result.songData.uniquenessStrategy,
+                draftPrompt: result.songData.draftPrompt,
+                refinementPrompt: result.songData.refinementPrompt,
+                finalSunoPrompt: result.songData.finalSunoPrompt,
+                youtubeTitles: result.songData.youtubeTitles,
+                youtubeDescription: result.songData.youtubeDescription,
+                tagRequestPrompt: result.songData.tagRequestPrompt,
+                contentIdWarning: result.songData.contentIdWarning,
+              }
+            : undefined,
+        });
+      }
+
       setIsSaved(true);
       onSaved();
     } catch (err) {
@@ -386,6 +425,14 @@ const PromptResult: React.FC<Props> = ({
           {isSaved ? '✅ 저장 완료' : '💾 등록 목록에 저장'}
         </Button>
       </div>
+
+      <DuplicateUrlModal
+        open={duplicateModal.open}
+        title="동일한 URL이 이미 등록되어 있어요."
+        matchedTitle={duplicateModal.matchedTitle}
+        matchedUrl={duplicateModal.matchedUrl}
+        onClose={() => setDuplicateModal({ open: false })}
+      />
     </div>
   );
 };

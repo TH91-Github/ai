@@ -122,6 +122,8 @@ export interface SavedSongPrompt {
   contentIdWarning: string;
 }
 
+export type SongRegistryStatus = 'registered' | 'unregistered';
+
 // ── 영상 프롬프트 입력 폼 ─────────────────────────────────────
 export interface VideoDraftForm {
   purpose: VideoPurpose;
@@ -146,18 +148,30 @@ export interface VideoDraftForm {
 }
 
 // ── 등록 목록 항목 ────────────────────────────────────────────
-export interface RegistryItem {
+interface BaseRegistryItem {
   id: string;
+  title: string;
+  url: string;
+  createdAt: string;      // ISO 8601
+  updatedAt?: string;     // ISO 8601
+}
+
+export interface BlogRegistryItem extends BaseRegistryItem {
   category: 'blog';
   type: BlogType;
   mainTopic: string;
   subTopic: string;
-  title: string;
-  url: string;
   keywords: string[];
-  createdAt: string;      // ISO 8601
   songData?: SavedSongPrompt;
 }
+
+export interface SongRegistryItem extends BaseRegistryItem {
+  category: 'song';
+  status: SongRegistryStatus;
+  promptText: string;
+}
+
+export type RegistryItem = BlogRegistryItem | SongRegistryItem;
 
 // ── 중복 체크 결과 ────────────────────────────────────────────
 export interface DuplicateCheckResult {
@@ -179,10 +193,9 @@ export interface GeneratedPrompt {
 // ── 통계 ─────────────────────────────────────────────────────
 export interface StatsData {
   totalCount: number;
-  byTopic: Record<string, number>;
-  byType: Record<BlogType, number>;
-  recentItems: RegistryItem[];
-  keywordFrequency: Array<{ keyword: string; count: number }>;
+  blogCount: number;
+  songCount: number;
+  recentItems: BlogRegistryItem[];
 }
 
 // ── Topic Pool ────────────────────────────────────────────────

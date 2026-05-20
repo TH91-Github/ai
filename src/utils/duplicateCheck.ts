@@ -63,6 +63,8 @@ export const checkDuplicate = (
   registry: RegistryItem[]
 ): DuplicateCheckResult => {
   for (const item of registry) {
+    if (item.category !== 'blog') continue;
+
     // 1. subTopic 유사도 0.75 이상 → 중복
     const topicSim = calcSimilarity(subTopic, item.subTopic);
     if (topicSim >= 0.75) {

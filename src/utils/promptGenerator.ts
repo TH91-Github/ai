@@ -5,6 +5,7 @@
 // =============================================================
 
 import type {
+  BlogRegistryItem,
   GeneralDraftForm,
   HistoryDraftForm,
   SongDraftForm,
@@ -162,7 +163,8 @@ const historicalFactCheckGuide = `
 
 // ── 일반 주제형 프롬프트 생성 ─────────────────────────────────
 export const generateGeneralPrompt = (
-  form: GeneralDraftForm
+  form: GeneralDraftForm,
+  existingBlogs: Pick<BlogRegistryItem, 'title' | 'subTopic' | 'url'>[] = []
 ): GeneratedPrompt => {
   const { mainTopic, subTopic, tone, includeHtml, includeImage } = form;
 
@@ -203,6 +205,21 @@ export const generateGeneralPrompt = (
   각 항목마다 무조건 넣지 말고, 이야기 흐름상 자연스러운 곳에만 삽입해 주세요.`
     : '';
 
+  const existingBlogGuide = existingBlogs.length
+    ? `\n[이미 등록된 블로그 목록 참고]
+- 아래는 이미 등록된 블로그 목록입니다.
+${existingBlogs
+  .slice(0, 20)
+  .map(
+    (item, index) =>
+      `${index + 1}. 제목: ${item.title} / 주제: ${item.subTopic} / URL: ${item.url || '없음'}`
+  )
+  .join('\n')}
+- 만약 사용자가 원하는 주제가 위 목록 중 하나와 동일하거나 사실상 같은 정보라고 판단되면, 새 글을 바로 작성하지 말고 먼저 "동일한 블로그가 있습니다."라고 알려 주세요.
+- 그 다음 줄에 기존 블로그의 제목과 URL을 함께 안내해 주세요.
+- 완전히 같은 정보가 아니라면 그때만 새 글 작성을 진행해 주세요.`
+    : '';
+
   const title = generateTitle(subTopic || mainTopic, tone);
 
   const prompt = `
@@ -223,7 +240,7 @@ export const generateGeneralPrompt = (
 - 사실에 근거하여 작성하고, 과장된 표현은 지양해 주세요.
 - 일반 정보성 주제라도 역사, 사건, 인물, 날짜, 통계, 제도 변화처럼 사실 확인이 필요한 내용이 포함되면 아래 팩트 검증 규칙을 우선 적용해 주세요.
 
-${historicalFactCheckGuide}${htmlGuide}${imageGuide}
+${historicalFactCheckGuide}${htmlGuide}${imageGuide}${existingBlogGuide}
 
 [추가 지침]
 - SEO를 고려하여 키워드를 자연스럽게 배치해 주세요.

@@ -12,7 +12,7 @@ import Select from '@/components/common/Select';
 import Input from '@/components/common/Input';
 import Toggle from '@/components/common/Toggle';
 import Button from '@/components/common/Button';
-import type { GeneralDraftForm as FormType, GeneratedPrompt } from '@/types';
+import type { BlogRegistryItem, GeneralDraftForm as FormType, GeneratedPrompt } from '@/types';
 import { getMainTopics, getSubTopics } from '@/data/topicPool';
 import { pickSubTopic } from '@/utils/promptGenerator';
 import { generateGeneralPrompt } from '@/utils/promptGenerator';
@@ -36,7 +36,7 @@ const GeneralDraftForm: React.FC<Props> = ({
   onDuplicateWarning,
   onError,
 }) => {
-  const { items, getUsedSubTopics } = useRegistryStore();
+  const { items, getUsedSubTopics, fetchItems } = useRegistryStore();
 
   const mainTopicOptions = getMainTopics().map((t) => ({ value: t, label: t }));
 
@@ -53,6 +53,12 @@ const GeneralDraftForm: React.FC<Props> = ({
   const [isManualSubTopic, setIsManualSubTopic] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormType, string>>>({});
+
+  useEffect(() => {
+    fetchItems('blog').catch(() => {
+      // 초안 생성은 계속 가능하게 두고, 중복 참고 목록만 비워 둡니다.
+    });
+  }, [fetchItems]);
 
   // 메인 주제 변경 시 세부 주제 풀 업데이트 및 자동 선택
   useEffect(() => {
@@ -89,7 +95,15 @@ const GeneralDraftForm: React.FC<Props> = ({
     setIsLoading(true);
 
     try {
-      const result = generateGeneralPrompt(form);
+      const existingBlogs = items
+        .filter((item): item is BlogRegistryItem => item.category === 'blog')
+        .map((item) => ({
+          title: item.title,
+          subTopic: item.subTopic,
+          url: item.url,
+        }));
+
+      const result = generateGeneralPrompt(form, existingBlogs);
 
       // 중복 체크
       const dupCheck = checkDuplicate(

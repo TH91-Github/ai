@@ -43,15 +43,18 @@ const MODE_SAFETY_NOTES: Record<MusicPromptFormValues['generationMode'], string[
     'keep arrangement accessible and distribution-friendly',
     'limit extreme sound design',
     'favor stable phrasing and clean tonal center',
+    'prioritize natural human vocal tone over synthetic vocal processing',
   ],
   balanced: [
     'balance accessibility with tasteful texture variation',
     'allow one standout rhythmic or textural hook',
+    'keep vocal tone expressive and human-forward',
   ],
   experimental: [
     'allow bold texture contrasts',
     'allow asymmetrical phrasing in small doses',
     'keep the main genre center intact',
+    'preserve natural vocal phrasing even with textural experimentation',
   ],
 };
 
@@ -165,6 +168,9 @@ const buildDescriptionKo = (draft: MusicPromptDraft, input: MusicPromptInput) =>
     `${input.topic}을 중심으로 ${draft.mainGenre} 기반의 ${draft.coreEmotion} 무드를 잡았습니다.`,
     draft.supportEmotion ? `${draft.supportEmotion} 감정을 보조축으로 묶었습니다.` : '',
     `${draft.bpmRange} 범위와 ${draft.tempoLabel} 에너지로 정리했고, ${distributionLabel} 기준을 함께 고려했습니다.`,
+    input.vocalMode !== 'instrumental_only'
+      ? '보컬은 과한 기계음보다 자연스럽고 사람 같은 감성 톤을 우선하도록 정리했습니다.'
+      : '',
     `${modeLabel} 모드라서 ${input.generationMode === 'safe' ? '안정성과 유통 친화성' : input.generationMode === 'balanced' ? '대중성과 질감의 균형' : '실험적 질감'}을 우선했습니다.`,
   ]
     .filter(Boolean)
@@ -243,6 +249,13 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       ...vocalTokens.slice(0, 2),
       input.outputType === 'hook_short' ? 'instant first-second hook' : 'measured emotional arc',
       'memorable rhythm motif',
+      input.outputType === 'hook_short'
+        ? 'short-form retention with non-generic phrasing'
+        : 'arrangement evolves gradually every 4 to 8 bars',
+      input.vocalMode !== 'instrumental_only'
+        ? 'natural human vocal tone with restrained processing'
+        : '',
+      'subtle melodic variation across repeated hooks',
       input.extra || '',
     ].filter(Boolean),
     negativeConstraints: [
@@ -250,6 +263,15 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       'avoid famous OST resemblance',
       'avoid ad-music familiarity',
       'avoid overused four-bar repetition',
+      'avoid metallic vocal texture',
+      'avoid robotic voice texture',
+      'avoid exaggerated pitch correction',
+      'avoid heavy synthetic vocal processing',
+      'avoid repeated vocal cadence across generations',
+      'avoid repeated loop structure across generations',
+      'avoid trending tiktok melody pattern',
+      'avoid overly generic social media bgm feel',
+      'minimize repeating identical rhythm blocks',
       input.outputType === 'hook_short' ? 'no slow intro' : '',
     ].filter(Boolean),
     safetyNotes: [
@@ -259,6 +281,10 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       'avoid similarity to existing songs',
       'avoid artist imitation',
       'avoid copyrighted melody',
+      'human-like emotional vocal tone',
+      'subtle arrangement change every 4 to 8 bars',
+      'repeated hooks should keep slight melodic variation',
+      'reduce common four-bar loop dependency',
       'content-id safe direction',
       'suitable for original music distribution',
       ...MODE_SAFETY_NOTES[input.generationMode],
@@ -285,12 +311,19 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
     '멜로디보다 rhythm hook과 syncopation 중심으로 설계했습니다.',
     '흔한 코드 진행 의존을 줄이고 비대칭적 전개를 유도했습니다.',
     '유명 OST, 광고 음악, 특정 아티스트 연상을 피하는 제약을 추가했습니다.',
+    '보컬은 기계적인 피치 보정보다 자연스러운 사람 톤을 우선하도록 제한했습니다.',
+    '4~8마디마다 편곡이 조금씩 변하고 반복 훅에도 미세한 멜로디 차이를 두도록 유도했습니다.',
+    '틱톡형 익숙한 멜로디 패턴과 과도하게 흔한 four-bar 반복 구조를 줄였습니다.',
   ];
   const draftPrompt = JSON.stringify(draft, null, 2);
   const refinementPrompt = [
     'Refine this into a Suno-friendly style prompt.',
     `Keep ${draft.mainGenre} as the main genre${draft.supportGenre ? ` with subtle ${draft.supportGenre}` : ''}.`,
     'Do not imitate any artist, song, OST, or commercial ad music.',
+    'Keep vocals natural, human, and emotionally expressive without metallic or robotic texture.',
+    'Reduce exaggerated pitch correction and heavy synthetic vocal processing.',
+    'Avoid recurring vocal cadence, generic four-bar loops, and trending short-form melody patterns.',
+    'Keep arrangement shifting slightly every 4 to 8 bars and add subtle melodic variation to repeated hooks.',
     'Keep the final style prompt short, strong, and token-based.',
   ].join(' ');
   const finalSunoPrompt = stylePrompt;
@@ -313,6 +346,7 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
     '특정 곡과 멜로디 유사성이 없는지 직접 청취 확인',
     '특정 아티스트 스타일로 바로 들리지 않는지 확인',
     '반복 생성본끼리의 유사성 비교',
+    '보컬 억양과 cadence가 이전 생성본과 지나치게 비슷하지 않은지 확인',
   ];
   const distributionSafetyCheck = [
     ...draft.distributionSafetyNotes,
@@ -323,6 +357,8 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
     '유명 곡명 또는 OST명 사용 여부 확인',
     '멜로디 유사성 여부 확인',
     '반복 생성본 유사성 여부 확인',
+    '보컬 기계음, 과한 오토튠, metallic texture 여부 확인',
+    '4~8마디 편곡 변화와 반복 훅의 미세 변주 여부 확인',
     'Content ID 확인 여부 점검',
     '플랫폼 정책 확인 여부 점검',
     '상업 사용 가능 여부 점검',

@@ -8,7 +8,7 @@
 //   - 토스트 알림 관리
 // =============================================================
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import GeneralDraftForm from '@/components/draft/GeneralDraftForm';
 import HistoryDraftForm from '@/components/draft/HistoryDraftForm';
 import SongDraftForm from '@/components/draft/SongDraftForm';
@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/useToast';
 import styles from './DraftPage.module.scss';
 
 type TabType = 'general' | 'history' | 'song' | 'video';
+type DraftSection = 'blog' | 'song' | 'video';
 
 const TABS: { key: TabType; label: string; desc: string }[] = [
   {
@@ -44,11 +45,42 @@ const TABS: { key: TabType; label: string; desc: string }[] = [
   },
 ];
 
-const DraftPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>('general');
+const SECTION_TABS: Record<DraftSection, TabType[]> = {
+  blog: ['general', 'history'],
+  song: ['song'],
+  video: ['video'],
+};
+
+const SECTION_META: Record<DraftSection, { title: string; desc: string }> = {
+  blog: {
+    title: '블로그 초안 만들기',
+    desc: '일반 주제형과 오늘의 역사형 블로그 프롬프트를 생성합니다',
+  },
+  song: {
+    title: '노래 초안 만들기',
+    desc: 'Suno용 스타일 프롬프트와 제작 보조 정보를 생성합니다',
+  },
+  video: {
+    title: '영상 초안 만들기',
+    desc: '영상 생성 도구에 넣을 수 있는 영상 프롬프트를 생성합니다',
+  },
+};
+
+interface DraftPageProps {
+  section?: DraftSection;
+}
+
+const DraftPage: React.FC<DraftPageProps> = ({ section = 'blog' }) => {
+  const availableTabs = useMemo(() => SECTION_TABS[section], [section]);
+  const [activeTab, setActiveTab] = useState<TabType>(availableTabs[0]);
   const [result, setResult] = useState<GeneratedPrompt | null>(null);
   const [resultMainTopic, setResultMainTopic] = useState('');
   const { toasts, show: showToast, remove: removeToast } = useToast();
+
+  useEffect(() => {
+    setActiveTab(availableTabs[0]);
+    setResult(null);
+  }, [availableTabs]);
 
   const handleGenerated = (r: GeneratedPrompt, mainTopic = '') => {
     setResult(r);
@@ -82,9 +114,9 @@ const DraftPage: React.FC = () => {
       </div>
 
       <div className={styles.pageHeader}>
-        <h1 className={styles.pageTitle}>초안 만들기</h1>
+        <h1 className={styles.pageTitle}>{SECTION_META[section].title}</h1>
         <p className={styles.pageDesc}>
-          AI(ChatGPT, Claude 등)에 붙여넣을 한국어 프롬프트를 생성합니다
+          {SECTION_META[section].desc}
         </p>
       </div>
 
@@ -92,21 +124,28 @@ const DraftPage: React.FC = () => {
         {/* 왼쪽: 폼 영역 */}
         <section className={styles.formSection}>
           {/* 탭 */}
-          <div className={styles.tabBar}>
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                className={[
-                  styles.tab,
-                  activeTab === tab.key ? styles.tabActive : '',
-                ].join(' ')}
-                onClick={() => handleTabChange(tab.key)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          {availableTabs.length > 1 && (
+            <div className={styles.tabBar}>
+              {availableTabs.map((tabKey) => {
+                const tab = TABS.find((item) => item.key === tabKey);
+                if (!tab) return null;
+
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    className={[
+                      styles.tab,
+                      activeTab === tab.key ? styles.tabActive : '',
+                    ].join(' ')}
+                    onClick={() => handleTabChange(tab.key)}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
 
           <div className={styles.tabDesc}>
             {TABS.find((t) => t.key === activeTab)?.desc}

@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
   const { user, loading, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/registry';
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ?? '/blog/registry';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -62,7 +62,7 @@ const LoginPage: React.FC = () => {
       <div className={styles.authPanel}>
         <div className={styles.header}>
           <h1>로그인</h1>
-          <p>등록 목록, 종합 통계, 임시 페이지는 로그인 후 이용할 수 있어요.</p>
+          <p>각 카테고리의 등록 목록은 로그인 후 이용할 수 있어요.</p>
         </div>
 
         <form className={styles.form} onSubmit={handleSubmit}>

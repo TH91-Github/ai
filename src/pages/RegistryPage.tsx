@@ -16,7 +16,7 @@ import type {
 } from '@/types';
 import styles from './RegistryPage.module.scss';
 
-type MainTab = 'blog' | 'song';
+type RegistrySection = 'blog' | 'song' | 'video';
 type BlogView = 'register' | 'list';
 type SongTab = 'all' | SongRegistryStatus;
 const BLOG_PAGE_SIZE = 10;
@@ -36,7 +36,45 @@ const getErrorMessage = (error: unknown) => {
   return error instanceof Error ? error.message : '요청 처리 중 오류가 발생했어요.';
 };
 
-const RegistryPage: React.FC = () => {
+const SECTION_META: Record<
+  RegistrySection,
+  {
+    title: string;
+    desc: string;
+    registerTitle?: string;
+    registerDesc?: string;
+    registerButton?: string;
+    emptyLabel: string;
+  }
+> = {
+  blog: {
+    title: '블로그 등록 목록',
+    desc: '블로그 등록 정보를 Firebase 기준으로 관리합니다.',
+    registerTitle: '블로그 직접 등록',
+    registerDesc: '발행한 블로그 글을 여기서 바로 Firebase에 추가할 수 있어요.',
+    registerButton: '블로그 등록',
+    emptyLabel: '블로그 등록 항목이 아직 없습니다.',
+  },
+  song: {
+    title: '노래 등록 목록',
+    desc: '노래 프롬프트와 등록 상태를 Firebase 기준으로 관리합니다.',
+    emptyLabel: '노래 등록 항목이 아직 없습니다.',
+  },
+  video: {
+    title: '영상 등록 목록',
+    desc: '영상 프롬프트와 발행 정보를 Firebase 기준으로 관리합니다.',
+    registerTitle: '영상 직접 등록',
+    registerDesc: '발행한 영상 관련 글이나 자료를 여기서 바로 Firebase에 추가할 수 있어요.',
+    registerButton: '영상 등록',
+    emptyLabel: '영상 등록 항목이 아직 없습니다.',
+  },
+};
+
+interface RegistryPageProps {
+  section?: RegistrySection;
+}
+
+const RegistryPage: React.FC<RegistryPageProps> = ({ section = 'blog' }) => {
   const {
     items,
     loading,
@@ -52,7 +90,6 @@ const RegistryPage: React.FC = () => {
   const { toasts, show: showToast, remove: removeToast } = useToast();
 
   const [query, setQuery] = useState('');
-  const [mainTab, setMainTab] = useState<MainTab>('blog');
   const [blogView, setBlogView] = useState<BlogView>('register');
   const [songTab, setSongTab] = useState<SongTab>('all');
   const [blogPage, setBlogPage] = useState(1);
@@ -84,10 +121,18 @@ const RegistryPage: React.FC = () => {
   }>({});
 
   const searchedItems = useMemo(() => searchItems(query), [query, searchItems, items]);
+  const blogRegistryItems = useMemo(
+    () =>
+      searchedItems.filter((item): item is BlogRegistryItem => {
+        if (item.category !== 'blog') return false;
+        if (section === 'video') return item.type === 'video';
+        return item.type !== 'video';
+      }),
+    [searchedItems, section]
+  );
   const blogItems = useMemo(
     () =>
-      searchedItems
-        .filter((item): item is BlogRegistryItem => item.category === 'blog')
+      blogRegistryItems
         .sort((a, b) => {
           const aOrder = getUrlOrderValue(a.url);
           const bOrder = getUrlOrderValue(b.url);
@@ -95,7 +140,7 @@ const RegistryPage: React.FC = () => {
           if (aOrder !== bOrder) return bOrder - aOrder;
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         }),
-    [searchedItems]
+    [blogRegistryItems]
   );
   const songItems = useMemo(
     () =>
@@ -112,13 +157,27 @@ const RegistryPage: React.FC = () => {
 
   useEffect(() => {
     setBlogPage(1);
-  }, [query, blogView]);
+  }, [query, blogView, section]);
 
   useEffect(() => {
     if (blogPage > blogPageCount) {
       setBlogPage(blogPageCount);
     }
   }, [blogPage, blogPageCount]);
+
+  useEffect(() => {
+    setQuery('');
+    setSongTab('all');
+    setBlogView(section === 'song' ? 'list' : 'register');
+  }, [section]);
+
+  useEffect(() => {
+    if (section === 'song') {
+      fetchItems('song', true).catch(() => {
+        // 기존 화면 상태를 유지합니다.
+      });
+    }
+  }, [fetchItems, section]);
 
   const handleDeleteBlog = async (id: string) => {
     try {
@@ -132,11 +191,6 @@ const RegistryPage: React.FC = () => {
   const handleOpenBlogList = async () => {
     setBlogView('list');
     await fetchItems('blog', true);
-  };
-
-  const handleOpenSongTab = async () => {
-    setMainTab('song');
-    await fetchItems('song', true);
   };
 
   const handleSaveBlog = async (
@@ -185,7 +239,7 @@ const RegistryPage: React.FC = () => {
 
       await addBlogItem({
         category: 'blog',
-        type: 'general',
+        type: section === 'video' ? 'video' : 'general',
         mainTopic: form.mainTopic.trim(),
         subTopic: form.subTopic.trim(),
         title: form.title.trim(),
@@ -312,50 +366,31 @@ const RegistryPage: React.FC = () => {
 
       <div className={styles.pageHeader}>
         <div className={styles.titleRow}>
-          <h1 className={styles.pageTitle}>등록 목록</h1>
-          <Badge color="primary">{items.length}개</Badge>
+          <h1 className={styles.pageTitle}>{SECTION_META[section].title}</h1>
+          <Badge color="primary">{section === 'song' ? songItems.length : blogItems.length}개</Badge>
         </div>
-        <p className={styles.pageDesc}>블로그와 노래 등록 정보를 Firebase 기준으로 관리합니다.</p>
-      </div>
-
-      <div className={styles.tabs}>
-        <button
-          type="button"
-          className={[styles.tab, mainTab === 'blog' ? styles.active : ''].filter(Boolean).join(' ')}
-          onClick={() => setMainTab('blog')}
-        >
-          블로그
-        </button>
-        <button
-          type="button"
-          className={[styles.tab, mainTab === 'song' ? styles.active : ''].filter(Boolean).join(' ')}
-          onClick={() => {
-            void handleOpenSongTab();
-          }}
-        >
-          노래
-        </button>
+        <p className={styles.pageDesc}>{SECTION_META[section].desc}</p>
       </div>
 
       {error && <p className={styles.errorBanner}>{error}</p>}
 
-      {(mainTab === 'song' || blogView === 'list') && (
+      {(section === 'song' || blogView === 'list') && (
         <div className={styles.toolbar}>
           <Input
-            placeholder={mainTab === 'blog' ? '제목, 주제, 키워드로 검색...' : '타이틀, 프롬프트, URL로 검색...'}
+            placeholder={section === 'song' ? '타이틀, 프롬프트, URL로 검색...' : '제목, 주제, 키워드로 검색...'}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             fullWidth
           />
           {query && (
             <span className={styles.searchResult}>
-              "{query}" 검색 결과: {mainTab === 'blog' ? blogItems.length : songItems.length}건
+              "{query}" 검색 결과: {section === 'song' ? songItems.length : blogItems.length}건
             </span>
           )}
         </div>
       )}
 
-      {mainTab === 'blog' ? (
+      {section !== 'song' ? (
         <>
           <div className={styles.blogViewBar}>
             <button
@@ -363,7 +398,7 @@ const RegistryPage: React.FC = () => {
               className={[styles.songTab, blogView === 'register' ? styles.songTabActive : ''].filter(Boolean).join(' ')}
               onClick={() => setBlogView('register')}
             >
-              블로그 등록
+              {section === 'video' ? '영상 등록' : '블로그 등록'}
             </button>
             <button
               type="button"
@@ -379,8 +414,8 @@ const RegistryPage: React.FC = () => {
           {blogView === 'register' ? (
             <div className={styles.registerBox}>
               <div className={styles.registerHeader}>
-                <h2 className={styles.registerTitle}>블로그 직접 등록</h2>
-                <p className={styles.registerDesc}>발행한 블로그 글을 여기서 바로 Firebase에 추가할 수 있어요.</p>
+                <h2 className={styles.registerTitle}>{SECTION_META[section].registerTitle}</h2>
+                <p className={styles.registerDesc}>{SECTION_META[section].registerDesc}</p>
               </div>
 
               <div className={styles.formGrid}>
@@ -423,7 +458,7 @@ const RegistryPage: React.FC = () => {
 
               <div className={styles.registerActions}>
                 <Button type="button" onClick={handleRegisterBlog} loading={registeringBlog}>
-                  블로그 등록
+                  {SECTION_META[section].registerButton}
                 </Button>
               </div>
             </div>
@@ -437,7 +472,7 @@ const RegistryPage: React.FC = () => {
               ) : blogItems.length === 0 ? (
                 <div className={styles.empty}>
                   <span className={styles.emptyIcon}>📭</span>
-                  <p>{query ? '검색 결과가 없습니다.' : '블로그 등록 항목이 아직 없습니다.'}</p>
+                  <p>{query ? '검색 결과가 없습니다.' : SECTION_META[section].emptyLabel}</p>
                 </div>
               ) : (
                 <div className={styles.blogList}>
@@ -507,7 +542,7 @@ const RegistryPage: React.FC = () => {
           ) : songItems.length === 0 ? (
             <div className={styles.empty}>
               <span className={styles.emptyIcon}>🎵</span>
-              <p>{query ? '검색 결과가 없습니다.' : '노래 등록 항목이 아직 없습니다.'}</p>
+              <p>{query ? '검색 결과가 없습니다.' : SECTION_META.song.emptyLabel}</p>
             </div>
           ) : (
             <div className={styles.songGrid}>

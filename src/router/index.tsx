@@ -9,39 +9,40 @@ import Layout from '@/components/layout/Layout';
 import DraftPage from '@/pages/DraftPage';
 import LoginPage from '@/pages/LoginPage';
 import RegistryPage from '@/pages/RegistryPage';
-import StatsPage from '@/pages/StatsPage';
-import TempPage from '@/pages/TempPage';
 
 export const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
     children: [
-      { index: true, element: <DraftPage /> },
-      { path: 'draft', element: <DraftPage /> },
+      { index: true, element: <Navigate to="/blog/draft" replace /> },
+      { path: 'draft', element: <Navigate to="/blog/draft" replace /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'signup', element: <Navigate to="/login" replace /> },
+      { path: 'blog/draft', element: <DraftPage section="blog" /> },
+      { path: 'song/draft', element: <DraftPage section="song" /> },
+      { path: 'video/draft', element: <DraftPage section="video" /> },
       {
-        path: 'registry',
+        path: 'blog/registry',
         element: (
           <ProtectedRoute>
-            <RegistryPage />
+            <RegistryPage section="blog" />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'stats',
+        path: 'song/registry',
         element: (
           <ProtectedRoute>
-            <StatsPage />
+            <RegistryPage section="song" />
           </ProtectedRoute>
         ),
       },
       {
-        path: 'temp',
+        path: 'video/registry',
         element: (
           <ProtectedRoute>
-            <TempPage />
+            <RegistryPage section="video" />
           </ProtectedRoute>
         ),
       },

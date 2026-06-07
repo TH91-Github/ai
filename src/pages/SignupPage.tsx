@@ -36,7 +36,7 @@ const SignupPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
 
   if (!loading && user) {
-    return <Navigate to="/registry" replace />;
+    return <Navigate to="/blog/registry" replace />;
   }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -55,7 +55,7 @@ const SignupPage: React.FC = () => {
     setSubmitting(true);
     try {
       await signup(email.trim(), password);
-      navigate('/registry', { replace: true });
+      navigate('/blog/registry', { replace: true });
     } catch (err) {
       setError(getSignupErrorMessage(err));
     } finally {

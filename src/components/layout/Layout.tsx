@@ -5,19 +5,35 @@
 // =============================================================
 
 import React from 'react';
-import { Link, NavLink, Outlet } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import styles from './Layout.module.scss';
 
-const NAV_ITEMS = [
-  { to: '/',         label: '✏️ 초안 만들기' },
-  { to: '/registry', label: '📚 등록 목록' },
-  { to: '/stats',    label: '📊 종합 통계' },
-  { to: '/temp',     label: '🧪 임시' },
-];
+const PRIMARY_NAV_ITEMS = [
+  { key: 'blog', to: '/blog/draft', label: '📝 블로그' },
+  { key: 'song', to: '/song/draft', label: '🎵 노래' },
+  { key: 'video', to: '/video/draft', label: '🎬 영상' },
+] as const;
+
+const SECONDARY_NAV_ITEMS = {
+  blog: [
+    { to: '/blog/draft', label: '초안 만들기' },
+    { to: '/blog/registry', label: '등록 목록' },
+  ],
+  song: [
+    { to: '/song/draft', label: '초안 만들기' },
+    { to: '/song/registry', label: '등록 목록' },
+  ],
+  video: [
+    { to: '/video/draft', label: '초안 만들기' },
+    { to: '/video/registry', label: '등록 목록' },
+  ],
+} as const;
 
 const Layout: React.FC = () => {
   const { user, loading, logout } = useAuth();
+  const location = useLocation();
+  const activeSection = PRIMARY_NAV_ITEMS.find((item) => location.pathname.startsWith(`/${item.key}`))?.key ?? 'blog';
 
   return (
     <div className={styles.root}>
@@ -27,13 +43,13 @@ const Layout: React.FC = () => {
             <span className={styles.brandIcon}>🖊</span>
             <span className={styles.brandName}>BlogPrompt<em>Tool</em></span>
           </Link>
-          <nav className={styles.nav} aria-label="주 메뉴">
-            {NAV_ITEMS.map(({ to, label }) => (
+          <nav className={styles.primaryNav} aria-label="대분류 메뉴">
+            {PRIMARY_NAV_ITEMS.map(({ key, to, label }) => (
               <NavLink
-                key={to}
+                key={key}
                 to={to}
                 className={({ isActive }) =>
-                  [styles.navItem, isActive ? styles.navItemActive : ''].join(' ')
+                  [styles.navItem, isActive || location.pathname.startsWith(`/${key}`) ? styles.navItemActive : ''].join(' ')
                 }
               >
                 {label}
@@ -62,6 +78,23 @@ const Layout: React.FC = () => {
                 </NavLink>
               </>
             )}
+          </div>
+        </div>
+        <div className={styles.subnavWrap}>
+          <div className={styles.subnavInner}>
+            <nav className={styles.secondaryNav} aria-label="세부 메뉴">
+              {SECONDARY_NAV_ITEMS[activeSection].map(({ to, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  className={({ isActive }) =>
+                    [styles.subnavItem, isActive ? styles.subnavItemActive : ''].join(' ')
+                  }
+                >
+                  {label}
+                </NavLink>
+              ))}
+            </nav>
           </div>
         </div>
       </header>

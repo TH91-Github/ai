@@ -248,12 +248,17 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       ...emotionTokens.slice(0, 2),
       ...vocalTokens.slice(0, 2),
       input.outputType === 'hook_short' ? 'instant first-second hook' : 'measured emotional arc',
+      'intro should stay within 10 seconds',
+      'full song length should stay under 4 minutes',
       'memorable rhythm motif',
       input.outputType === 'hook_short'
         ? 'short-form retention with non-generic phrasing'
         : 'arrangement evolves gradually every 4 to 8 bars',
       input.vocalMode !== 'instrumental_only'
         ? 'natural human vocal tone with restrained processing'
+        : '',
+      input.vocalMode !== 'instrumental_only'
+        ? 'single-lead vocal feel without crowd-like echo layering'
         : '',
       'subtle melodic variation across repeated hooks',
       input.extra || '',
@@ -266,7 +271,11 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       'avoid metallic vocal texture',
       'avoid robotic voice texture',
       'avoid exaggerated pitch correction',
+      'avoid autotune-heavy vocal tone',
       'avoid heavy synthetic vocal processing',
+      'avoid cheering crowd vocal',
+      'avoid multiple people speaking-like echo texture',
+      'avoid strong crowd-layered vocal echo',
       'avoid repeated vocal cadence across generations',
       'avoid repeated loop structure across generations',
       'avoid trending tiktok melody pattern',
@@ -282,6 +291,10 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       'avoid artist imitation',
       'avoid copyrighted melody',
       'human-like emotional vocal tone',
+      'no cheering crowd layer',
+      'no autotune-forward vocal color',
+      'limit vocal intro to under 10 seconds before main section',
+      'target total runtime under 4 minutes',
       'subtle arrangement change every 4 to 8 bars',
       'repeated hooks should keep slight melodic variation',
       'reduce common four-bar loop dependency',
@@ -321,7 +334,10 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
     `Keep ${draft.mainGenre} as the main genre${draft.supportGenre ? ` with subtle ${draft.supportGenre}` : ''}.`,
     'Do not imitate any artist, song, OST, or commercial ad music.',
     'Keep vocals natural, human, and emotionally expressive without metallic or robotic texture.',
-    'Reduce exaggerated pitch correction and heavy synthetic vocal processing.',
+    'Reduce exaggerated pitch correction, autotune-heavy tone, and heavy synthetic vocal processing.',
+    'Do not use cheering crowd vocals or a strong multiple-people echo feel.',
+    'Keep the intro within 10 seconds before the main section arrives.',
+    'Keep the total song length under 4 minutes.',
     'Avoid recurring vocal cadence, generic four-bar loops, and trending short-form melody patterns.',
     'Keep arrangement shifting slightly every 4 to 8 bars and add subtle melodic variation to repeated hooks.',
     'Keep the final style prompt short, strong, and token-based.',
@@ -347,6 +363,7 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
     '특정 아티스트 스타일로 바로 들리지 않는지 확인',
     '반복 생성본끼리의 유사성 비교',
     '보컬 억양과 cadence가 이전 생성본과 지나치게 비슷하지 않은지 확인',
+    '환호성, 군중 보컬, 여러 명이 말하는 듯한 강한 에코가 없는지 확인',
   ];
   const distributionSafetyCheck = [
     ...draft.distributionSafetyNotes,
@@ -358,6 +375,9 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
     '멜로디 유사성 여부 확인',
     '반복 생성본 유사성 여부 확인',
     '보컬 기계음, 과한 오토튠, metallic texture 여부 확인',
+    '전주가 10초를 넘기지 않는지 확인',
+    '전체 재생 길이가 4분 이내인지 확인',
+    '여러 명이 겹쳐 말하는 듯한 강한 에코가 없는지 확인',
     '4~8마디 편곡 변화와 반복 훅의 미세 변주 여부 확인',
     'Content ID 확인 여부 점검',
     '플랫폼 정책 확인 여부 점검',

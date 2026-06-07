@@ -27,6 +27,10 @@ const TYPE_LABELS: Record<BlogRegistryItem['type'], string> = {
   video: '영상',
 };
 
+const CATEGORY_LABELS: Partial<Record<BlogRegistryItem['type'], string>> = {
+  video: '영상',
+};
+
 const RegistryCard: React.FC<Props> = ({ item, onDelete, onSave }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -111,7 +115,7 @@ const RegistryCard: React.FC<Props> = ({ item, onDelete, onSave }) => {
     <div className={styles.card}>
       <div className={styles.cardHeader}>
         <div className={styles.metaRow}>
-          <Badge color="primary">블로그</Badge>
+          <Badge color="primary">{CATEGORY_LABELS[item.type] ?? '블로그'}</Badge>
           <Badge color="neutral">{TYPE_LABELS[item.type]}</Badge>
           <span className={styles.topic}>메인 주제: {item.mainTopic}</span>
           <span className={styles.date}>{formattedDate}</span>

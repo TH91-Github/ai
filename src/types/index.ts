@@ -90,8 +90,6 @@ export type VideoLength = '5s' | '8s' | '15s' | '30s';
 // ── 일반 주제형 입력 폼 ───────────────────────────────────────
 export interface GeneralDraftForm {
   mainTopic: string;
-  subTopic: string;       // 자동 선택 or 직접 입력
-  tone: ToneType;
   includeHtml: boolean;   // HTML 결과 유도 여부
   includeImage: boolean;  // 이미지 프롬프트 포함 여부
 }

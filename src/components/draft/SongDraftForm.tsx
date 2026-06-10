@@ -4,8 +4,6 @@ import Input from '@/components/common/Input';
 import type { GeneratedPrompt } from '@/types';
 import {
   CORE_EMOTION_OPTIONS,
-  DISTRIBUTION_OPTIONS,
-  DURATION_OPTIONS,
   MAIN_GENRE_OPTIONS,
   MODE_OPTIONS,
   OUTPUT_TYPE_OPTIONS,
@@ -47,43 +45,9 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
 
   return (
     <div className={styles.formBody}>
-      <div className={styles.infoBox}>
-        <strong>AI 음악 프롬프트 워크플로우</strong>
-        <p>
-          긴 문장을 직접 쓰는 대신 핵심 감정, 장르, 질감만 고르면 내부적으로 확장과 충돌 제거를 거쳐
-          Suno용 Style Prompt를 압축해 생성합니다.
-        </p>
-      </div>
-
-      <div className={styles.noticeBox}>
-        <strong>생성 원칙</strong>
-        <p>
-          메인 장르 1개, 감정 최대 2개, 질감 최대 3개만 받아 과한 조합을 줄입니다.
-          최종 프롬프트는 짧고 강하게 압축되며, 유통과 Content ID 리스크를 낮추는 문구가 함께 반영됩니다.
-        </p>
-      </div>
-
       <div className={styles.fieldRow}>
         <span>결과물 유형</span>
         <OptionCardGroup options={OUTPUT_TYPE_OPTIONS} value={form.outputType} onChange={setOutputType} />
-      </div>
-
-      <div className={styles.fieldRow}>
-        <span>길이 목표</span>
-        <SingleSelectPillGroup
-          options={DURATION_OPTIONS}
-          value={form.durationTarget}
-          onChange={(value) => updateForm('durationTarget', value)}
-        />
-      </div>
-
-      <div className={styles.fieldRow}>
-        <span>배포 의도</span>
-        <SingleSelectPillGroup
-          options={DISTRIBUTION_OPTIONS}
-          value={form.distributionIntent}
-          onChange={(value) => updateForm('distributionIntent', value)}
-        />
       </div>
 
       <div className={styles.fieldRow}>
@@ -107,7 +71,7 @@ const SongDraftForm: React.FC<Props> = ({ onGenerated, onError }) => {
       </div>
 
       <div className={styles.fieldRow}>
-        <span>Texture / 사운드 질감 (최대 3개)</span>
+        <span>텍스처 / 사운드 질감 (최대 3개)</span>
         <OptionPillGroup options={TEXTURE_OPTIONS} values={form.textures} onToggle={toggleTexture} />
       </div>
 

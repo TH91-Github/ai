@@ -83,6 +83,15 @@ const INSTRUMENT_STYLE_MAP = {
   mixed: ['hybrid instrument blend', 'layered arrangement'],
 } as const;
 
+const DURATION_GUIDE_MAP: Record<MusicPromptInput['durationTarget'], string> = {
+  d15: 'target around 15 seconds',
+  d30: 'target around 30 seconds',
+  d60: 'target around 1 minute',
+  d180: 'target around 3 minutes',
+  d210: 'target around 3 minutes 30 seconds',
+  auto: 'target within 4 minutes',
+};
+
 const formatBulletBlock = (title: string, items: string[]) =>
   `## ${title}\n\n- ${items.join('\n- ')}`;
 
@@ -250,6 +259,7 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       input.outputType === 'hook_short' ? 'instant first-second hook' : 'measured emotional arc',
       'intro should stay within 10 seconds',
       'full song length should stay under 4 minutes',
+      DURATION_GUIDE_MAP[input.durationTarget],
       'memorable rhythm motif',
       input.outputType === 'hook_short'
         ? 'short-form retention with non-generic phrasing'
@@ -295,6 +305,7 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
       'no autotune-forward vocal color',
       'limit vocal intro to under 10 seconds before main section',
       'target total runtime under 4 minutes',
+      DURATION_GUIDE_MAP[input.durationTarget],
       'subtle arrangement change every 4 to 8 bars',
       'repeated hooks should keep slight melodic variation',
       'reduce common four-bar loop dependency',
@@ -355,6 +366,7 @@ export const generateMusicPrompt = (form: MusicPromptFormValues): GeneratedPromp
     `템포 범위: ${draft.bpmRange}`,
     `출력 유형: ${input.outputType}`,
     `배포 의도: ${input.distributionIntent}`,
+    `길이 기준: ${input.durationTarget === 'd60' ? '약 1분' : input.durationTarget === 'd180' ? '약 3분' : input.durationTarget === 'd210' ? '약 3분 30초' : '최대 4분 이내'}`,
   ].join('\n');
   const tagRequestPrompt =
     '메인 장르, 핵심 감정, 텍스처, 템포를 바탕으로 유튜브용 태그 8~12개를 추천해 주세요. 실존 아티스트명과 곡명은 제외합니다.';

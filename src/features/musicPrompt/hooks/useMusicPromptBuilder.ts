@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  DISTRIBUTION_OPTIONS,
   OUTPUT_TYPE_OPTIONS,
   PURPOSE_BY_OUTPUT,
   VERSION_BY_OUTPUT,
@@ -15,10 +14,16 @@ import type {
 import { generateMusicPrompt } from '@/features/musicPrompt/utils/generateMusicPrompt';
 import { validateMusicPrompt } from '@/features/musicPrompt/utils/validateMusicPrompt';
 
+const DURATION_BY_OUTPUT: Record<MusicPromptFormValues['outputType'], MusicPromptFormValues['durationTarget']> = {
+  song: 'd180',
+  hook_short: 'd60',
+  instrumental: 'd180',
+};
+
 export const INITIAL_MUSIC_PROMPT_FORM: MusicPromptFormValues = {
   purpose: PURPOSE_BY_OUTPUT.song,
   outputType: OUTPUT_TYPE_OPTIONS[0].value,
-  durationTarget: 'd60',
+  durationTarget: DURATION_BY_OUTPUT.song,
   distributionIntent: 'social_and_release',
   versionType: VERSION_BY_OUTPUT.song,
   vocalMode: VOCAL_MODE_BY_OUTPUT.song,
@@ -88,6 +93,8 @@ export const useMusicPromptBuilder = () => {
       ...prev,
       outputType: value,
       purpose: PURPOSE_BY_OUTPUT[value],
+      durationTarget: DURATION_BY_OUTPUT[value],
+      distributionIntent: 'social_and_release',
       versionType: VERSION_BY_OUTPUT[value],
       vocalMode: VOCAL_MODE_BY_OUTPUT[value],
     }));

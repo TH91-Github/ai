@@ -11,7 +11,6 @@ import type {
   SongDraftForm,
   VideoDraftForm,
   GeneratedPrompt,
-  ToneType,
 } from '@/types';
 import { getSubTopics } from '@/data/topicPool';
 import { generateMusicPrompt } from '@/features/musicPrompt/utils/generateMusicPrompt';
@@ -74,25 +73,16 @@ export const pickSubTopic = (
 };
 
 /** 제목 자동 생성 */
-export const generateTitle = (
-  subTopic: string,
-  tone: ToneType
-): string => {
-  if (tone === 'blog') {
-    const prefixes = [
-      '알아두면 유익한',
-      '꼭 알아야 할',
-      '쉽게 이해하는',
-      '실생활에서 바로 쓰는',
-      '전문가가 알려주는',
-    ];
-    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-    return `${prefix} ${subTopic}`;
-  }
-  // info 톤
-  const prefixes = ['완벽 정리:', '핵심 가이드:', '정보 정리:', '한눈에 보는:'];
+export const generateTitle = (mainTopic: string): string => {
+  const prefixes = [
+    '알아두면 좋은',
+    '생활에 도움이 되는',
+    '편안하게 풀어보는',
+    '쉽게 살펴보는',
+    '차분하게 정리해 보는',
+  ];
   const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-  return `${prefix} ${subTopic}`;
+  return `${prefix} ${mainTopic}`;
 };
 
 /** 키워드 추출 (세부 주제 기반 간단 토크나이저) */
@@ -166,43 +156,30 @@ export const generateGeneralPrompt = (
   form: GeneralDraftForm,
   existingBlogs: Pick<BlogRegistryItem, 'title' | 'subTopic' | 'url'>[] = []
 ): GeneratedPrompt => {
-  const { mainTopic, subTopic, tone, includeHtml, includeImage } = form;
+  const { mainTopic, includeImage } = form;
 
-  if (!mainTopic) {
+  if (!mainTopic.trim()) {
     throw new Error('메인 주제는 필수입니다.');
   }
 
-  // 세부 주제 힌트 풀 구성 (AI가 참고 후 자율 선택)
-  const subTopicPool = getSubTopics(mainTopic);
-  const subTopicHint = subTopic
-    ? `아래 참고 힌트 중 하나를 선택하거나, 더 적합한 세부 주제를 자유롭게 선정해도 됩니다:\n  힌트 예시: ${subTopicPool.slice(0, 5).join(' / ')}\n  (현재 선호 힌트: "${subTopic}" — 비슷하거나 더 나은 주제로 자유롭게 변경 가능)`
-    : `아래 힌트를 참고하여 가장 흥미롭고 독자에게 유익한 세부 주제를 AI가 직접 선정해 주세요:\n  힌트 예시: ${subTopicPool.slice(0, 5).join(' / ')}`;
+  const normalizedMainTopic = mainTopic.trim();
+  const keywords = extractKeywords(normalizedMainTopic, normalizedMainTopic);
 
-  const keywords = extractKeywords(mainTopic, subTopic || mainTopic);
-
-  const toneGuide =
-    tone === 'blog'
-      ? '친근하고 읽기 쉬운 블로그 문체로, 독자와 대화하듯 작성해 주세요.'
-      : '신뢰감 있는 정보 전달 문체로, 객관적이고 명확하게 작성해 주세요.';
-
-  // HTML 출력 시 완전한 HTML 파일 구조 요구
-  const htmlGuide = includeHtml
-    ? `\n- 결과물은 반드시 완전한 HTML 파일 형식으로 작성해 주세요.
+  const htmlGuide = `\n- 결과물은 반드시 완전한 HTML 파일 형식으로 작성해 주세요.
   <!DOCTYPE html>부터 </html>까지 전체 구조를 포함하고,
   <head>에 charset, viewport, 인라인 <style>로 가독성 좋은 CSS를 포함해 주세요.
   본문은 <h1>(제목), <h2>(소제목), <p>, <ul>, <strong> 등을 적절히 사용해 주세요.
   배경색 #fff, 최대 너비 800px, 줄간격 1.8, 여백 충분히, 모바일 대응(반응형) 포함.
   제목 영역과 본문 영역에는 그라데이션, 컬러 배경, 카드 배경을 넣지 말고 흰 배경 또는 투명 배경으로 단순하게 유지해 주세요.
-  블로그 에디터에 그대로 옮겨도 배경색이 붙지 않도록 배경 스타일은 최소화해 주세요.`
-    : '';
+  블로그 에디터에 그대로 옮겨도 배경색이 붙지 않도록 배경 스타일은 최소화해 주세요.`;
 
-  // 이미지 프롬프트: 전체 글 흐름상 최대 3개
   const imageGuide = includeImage
-    ? `\n- 글 전체 흐름에서 시각적으로 꼭 필요한 위치에만 이미지 프롬프트를 배치해 주세요.
-  이미지 수는 썸네일 1개를 제외하고 본문 안에서는 최대 2개까지만 사용해 주세요.
-  위치 기준: ① 도입부 대표 이미지, ② 핵심 본문 1곳, ③ 필요할 때만 본문 추가 1곳
+    ? `\n- 이미지 프롬프트는 글 흐름상 꼭 필요한 위치에만 배치해 주세요.
+  이미지 개수는 미리 고정하지 말고, 내용상 필요할 때만 자연스럽게 넣어 주세요.
+  어떤 글은 1개만 있어도 충분하고, 어떤 글은 여러 장면이 필요할 수 있어요.
+  다만 모든 소제목마다 억지로 넣지는 말고, 정보 이해와 몰입에 실제로 도움이 되는 장면에만 넣어 주세요.
   형식: [Image prompt: 영문 설명, photographic style, natural lighting]
-  각 항목마다 무조건 넣지 말고, 이야기 흐름상 자연스러운 곳에만 삽입해 주세요.`
+  같은 장면을 반복하지 말고, 장면 초점과 구도에 차이를 두어 주세요.`
     : '';
 
   const existingBlogGuide = existingBlogs.length
@@ -220,25 +197,50 @@ ${existingBlogs
 - 완전히 같은 정보가 아니라면 그때만 새 글 작성을 진행해 주세요.`
     : '';
 
-  const title = generateTitle(subTopic || mainTopic, tone);
+  const title = generateTitle(normalizedMainTopic);
 
   const prompt = `
-당신은 전문 블로그 작가입니다. 아래 조건에 맞는 블로그 글을 작성해 주세요.
+당신은 TV 홈쇼핑 진행자, 라디오 진행자, 생활정보 프로그램 MC처럼 편안하게 설명하는 전문가입니다.
 
-[주제 설정 — AI 자율 선택]
-- 메인 주제: ${mainTopic}
-- 세부 주제 선정: ${subTopicHint}
-→ 위 힌트를 참고하여 AI가 가장 독자에게 유익하고 흥미로운 세부 주제와 제목을 직접 결정해 주세요.
-→ 제목을 직접 결정하면서 어떤 사건, 일인지 알 수 있게도 작성해 주세요.
-→ 결과물 첫 줄에 "선정된 세부 주제: ___" 형식으로 명시해 주세요.
+딱딱한 설명문이나 사전식 문체를 사용하지 마세요.
+
+마치 옆에서 차분하게 설명해 주는 것처럼 자연스럽고 부드러운 어조로 작성하세요.
+
+다음과 같은 표현을 적절히 활용하세요.
+
+* ~인데요
+* ~볼 수 있어요
+* ~라고 알려져 있어요
+* ~도움이 될 수 있어요
+* ~하는 분들도 많아요
+* ~참고해 보시면 좋을 것 같아요
+* ~느껴질 수 있어요
+* ~라고 할 수 있는데요
+* ~하시는 경우가 많아요
+* ~중 하나예요
+
+독자에게 명령하거나 단정하지 말고, 편안하게 안내하는 느낌으로 작성하세요.
+
+문장이 모두 같은 길이로 반복되지 않도록 하고, 중간중간 자연스럽게 호흡을 넣어 주세요.
+
+뉴스 기사, 보고서, 백과사전 같은 문체는 피하고 생활정보 프로그램을 진행하는 사람이 이야기하듯 작성하세요.
+
+과장된 광고 문구는 사용하지 말고, 신뢰감 있고 차분한 분위기를 유지하세요.
+
+아래 조건에 맞는 일반 주제형 블로그 글을 작성해 주세요.
+
+[주제 설정]
+- 메인 주제: ${normalizedMainTopic}
+- 위 메인 주제를 중심으로 독자가 바로 이해할 수 있는 구체적인 글 방향과 제목을 자연스럽게 정해 주세요.
+- 세부 주제를 따로 표시하거나 "선정된 세부 주제" 같은 문구는 출력하지 마세요.
 
 [작성 조건]
-- 톤앤매너: ${toneGuide}
 - 분량: 1,200 ~ 1,800자 (한국어 기준)
 - 구성: 도입부 → 본문 (3~4개 소제목) → 마무리
 - 참고 키워드(자연스럽게 활용): ${keywords.join(', ')}
 - 사실에 근거하여 작성하고, 과장된 표현은 지양해 주세요.
 - 일반 정보성 주제라도 역사, 사건, 인물, 날짜, 통계, 제도 변화처럼 사실 확인이 필요한 내용이 포함되면 아래 팩트 검증 규칙을 우선 적용해 주세요.
+- 최종 결과는 바로 붙여 넣을 수 있는 HTML 본문 형태로 작성해 주세요.
 
 ${historicalFactCheckGuide}${htmlGuide}${imageGuide}${existingBlogGuide}
 
@@ -246,10 +248,12 @@ ${historicalFactCheckGuide}${htmlGuide}${imageGuide}${existingBlogGuide}
 - SEO를 고려하여 키워드를 자연스럽게 배치해 주세요.
 - 독자가 실생활에서 바로 적용할 수 있는 실용적인 정보를 포함해 주세요.
 - 소제목은 독자의 궁금증을 유발하는 형태로 작성해 주세요.
+- 소제목이 지나치게 기사형, 보고서형, 백과사전형으로 딱딱해지지 않게 해 주세요.
+- 전체 말투는 설명하려고 힘주는 느낌보다, 차분하게 곁에서 풀어주는 생활정보 진행자 톤을 유지해 주세요.
 - 출처 표시나 인용 표시를 따로 하지 말고, 자연스러운 문장으로만 작성해 주세요.
 - contentReference, oaicite, citation, reference 같은 내부 표기와 placeholder 문자열은 절대 출력하지 말아 주세요.
 - HTML 결과물에도 사용자에게 실제로 보이는 텍스트만 포함하고, 코드/placeholder/참조 태그는 모두 제거해 주세요.
-- 최종 출력은 사람이 바로 읽고 복사할 수 있는 순수 본문만 남겨 주세요.
+- 최종 출력은 HTML만 출력하고, 별도 설명이나 안내 문구는 붙이지 말아 주세요.
 - 메인 제목에는 주제와 어울리는 이모지를 1개 포함해 주세요.
 - 각 소제목에도 내용과 분위기에 맞는 이모지를 1개씩 붙여, 타이틀끼리 시각적으로 구분되게 해 주세요.
 - 다만 이모지가 과하게 튀지 않도록, 한 제목당 1개만 사용해 주세요.
@@ -261,7 +265,7 @@ ${historicalFactCheckGuide}${htmlGuide}${imageGuide}${existingBlogGuide}
 - 전체적으로 과장된 연출, 과한 조명, 과도한 영화 포스터 느낌보다 차분하고 현실적인 사진 분위기를 우선해 주세요.
 `.trim();
 
-  return { title, prompt, subTopic: subTopic || mainTopic, keywords, includeHtml };
+  return { title, prompt, subTopic: normalizedMainTopic, keywords, includeHtml: true };
 };
 
 // ── 오늘의 역사형 프롬프트 생성 ──────────────────────────────
@@ -366,6 +370,15 @@ ${historicalFactCheckGuide}
 4. 톤과 스타일
 - ${toneGuide}
 - 말하듯 자연스럽게 작성해 주세요.
+- 역사적 사실을 단순 나열하지 마세요.
+- 각 사건은 독립적으로 설명하기보다 원인과 결과, 전개 과정이 자연스럽게 이어지도록 작성하세요.
+- 문단마다 "그래서", "그런데", "이후", "결국", "당시", "한편", "시간이 지나면서", "이 사건은", "이것이 계기가 되어"와 같은 연결 구조를 적극 활용하세요.
+- 독자가 연표를 읽는 느낌이 아니라 역사 강연을 듣는 느낌이 들도록 작성하세요.
+- 정보를 전달하는 것보다 사건이 어떻게 흘러갔는지를 보여주는 데 집중하세요.
+- 문장은 짧게 끊어 쓰기보다 앞 문장과 다음 문장이 자연스럽게 이어지도록 구성하세요.
+- 사건 A를 설명한 뒤에는 반드시 "왜?", "그 결과?", "이후 어떤 변화가 있었는가?"를 연결해서 서술하세요.
+- 역사 교과서보다 다큐멘터리 내레이션, 역사 강연, 인문 교양서에 가까운 문체를 사용하세요.
+- 문장 종결은 "~했다"만 반복하지 말고 "~하게 된다", "~로 이어졌다", "~였는데", "~라고 볼 수 있다", "~라는 평가를 받는다" 등을 적절히 섞어 사용하세요.
 - 지나치게 딱딱한 교과서 문체나 보고서 문체는 피하고, 이해하기 쉬운 역사 이야기 문체로 풀어 주세요.
 - 어려운 내용을 풀어줄 때는 대중 강연처럼 쉬운 말로 설명하되, 과장하거나 연기하듯 말하지는 마세요.
 - 한 문장 한 문장이 또박또박 들리는 느낌으로 쓰되, 너무 방송 대본처럼 과한 감탄이나 추임새는 넣지 말아 주세요.
@@ -384,6 +397,8 @@ ${historicalFactCheckGuide}
 - 도입부에서는 당시의 공기, 분위기, 사람 감정이 느껴지도록 현장처럼 시작해 주세요.
 - 배경 설명에서는 노동 환경, 사회 분위기, 정치 상황 등 왜 이 사건이 벌어졌는지 이해되게 풀어 주세요.
 - 사건 발생과 전개에서는 시간 흐름이 보이도록 갈등, 폭발, 충돌 구조를 자연스럽게 보여 주세요.
+- 사건을 하나 설명하고 끝내지 말고, 그 장면이 왜 벌어졌는지, 그 결과 무엇이 달라졌는지까지 이어서 풀어 주세요.
+- "당시 어떤 배경이 있었는가 → 그래서 무슨 일이 벌어졌는가 → 그런데 이후 어떤 반응과 변화가 이어졌는가" 흐름이 본문에 자연스럽게 드러나야 합니다.
 - 가능하다면 숫자, 규모, 기간 같은 구체 정보도 포함해 주세요.
 - 결과 및 이후 변화에서는 사건이 어떻게 마무리됐고 이후 사회에 어떤 영향을 남겼는지 연결해 주세요.
 - 정리 구간에서는 교훈을 억지로 만들지 말고, 확인된 결과와 이후 변화, 남은 쟁점이나 기록된 사실을 차분히 정리해 주세요.

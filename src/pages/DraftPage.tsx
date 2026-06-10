@@ -154,12 +154,7 @@ const DraftPage: React.FC<DraftPageProps> = ({ section = 'blog' }) => {
           <div className={styles.formCard}>
             {activeTab === 'general' ? (
               <GeneralDraftForm
-                onGenerated={(r) => {
-                  // GeneralDraftForm에서 mainTopic 전달이 필요하므로 내부 상태 별도 처리
-                  setResult(r);
-                  setResultMainTopic('');
-                  showToast('프롬프트가 생성되었습니다!', 'success');
-                }}
+                onGenerated={(r, mainTopic) => handleGenerated(r, mainTopic)}
                 onDuplicateWarning={(msg) => showToast(msg, 'warning')}
                 onError={(msg) => showToast(msg, 'error')}
               />

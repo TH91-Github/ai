@@ -15,9 +15,9 @@ import type {
 } from '@/features/musicPrompt/types';
 
 export const OUTPUT_TYPE_OPTIONS: Array<{ value: SongOutputType; label: string; description: string }> = [
-  { value: 'song', label: '일반 노래', description: '완성형 감상용 곡' },
-  { value: 'hook_short', label: '숏츠 훅', description: '짧고 강한 숏폼 음악' },
-  { value: 'instrumental', label: '연주/BGM', description: '무보컬 배경 음악' },
+  { value: 'song', label: '일반 노래', description: '완성형 감상용 곡 · 약 3분' },
+  { value: 'hook_short', label: '숏츠 훅', description: '짧고 강한 숏폼 음악 · 1분 이내' },
+  { value: 'instrumental', label: '연주/BGM', description: '무보컬 배경 음악 · 약 3분' },
 ];
 
 export const DURATION_OPTIONS: Array<{ value: SongDurationTarget; label: string }> = [
@@ -69,32 +69,32 @@ export const CORE_EMOTION_OPTIONS: Array<{ value: CoreEmotion; label: string }> 
 
 export const MAIN_GENRE_OPTIONS: Array<{ value: MainGenre; label: string }> = [
   { value: 'ai_recommend', label: 'AI 추천' },
-  { value: 'pop', label: 'Pop' },
-  { value: 'ballad', label: 'Ballad' },
-  { value: 'lofi', label: 'Lofi' },
-  { value: 'acoustic_folk', label: 'Acoustic Folk' },
-  { value: 'synthwave', label: 'Synthwave' },
-  { value: 'indie_electronic', label: 'Indie Electronic' },
-  { value: 'cinematic', label: 'Cinematic' },
-  { value: 'jazz_lounge', label: 'Jazz Lounge' },
-  { value: 'ambient', label: 'Ambient' },
-  { value: 'rnb', label: 'R&B' },
+  { value: 'pop', label: '팝' },
+  { value: 'ballad', label: '발라드' },
+  { value: 'lofi', label: '로파이' },
+  { value: 'acoustic_folk', label: '어쿠스틱 포크' },
+  { value: 'synthwave', label: '신스웨이브' },
+  { value: 'indie_electronic', label: '인디 일렉트로닉' },
+  { value: 'cinematic', label: '시네마틱' },
+  { value: 'jazz_lounge', label: '재즈 라운지' },
+  { value: 'ambient', label: '앰비언트' },
+  { value: 'rnb', label: '알앤비' },
 ];
 
 export const TEXTURE_OPTIONS: Array<{ value: TextureOption; label: string }> = [
   { value: 'ai_recommend', label: 'AI 추천' },
-  { value: 'analog_warmth', label: 'Analog Warmth' },
-  { value: 'tape_saturation', label: 'Tape Saturation' },
-  { value: 'cinematic_ambience', label: 'Cinematic Ambience' },
-  { value: 'lush_reverb', label: 'Lush Reverb' },
-  { value: 'ambient_texture', label: 'Ambient Texture' },
-  { value: 'layered_harmonies', label: 'Layered Harmonies' },
-  { value: 'stereo_widening', label: 'Stereo Widening' },
-  { value: 'low_pass_intro', label: 'Low-pass Intro' },
-  { value: 'gated_snare', label: 'Gated Snare' },
-  { value: 'detuned_synth', label: 'Detuned Synth' },
-  { value: 'vinyl_crackle', label: 'Vinyl Crackle' },
-  { value: 'rainy_ambience', label: 'Rainy Ambience' },
+  { value: 'analog_warmth', label: '아날로그 온기' },
+  { value: 'tape_saturation', label: '테이프 새추레이션' },
+  { value: 'cinematic_ambience', label: '시네마틱 앰비언스' },
+  { value: 'lush_reverb', label: '풍성한 리버브' },
+  { value: 'ambient_texture', label: '앰비언트 텍스처' },
+  { value: 'layered_harmonies', label: '레이어드 하모니' },
+  { value: 'stereo_widening', label: '스테레오 확장감' },
+  { value: 'low_pass_intro', label: '로우패스 인트로' },
+  { value: 'gated_snare', label: '게이티드 스네어' },
+  { value: 'detuned_synth', label: '디튠 신스' },
+  { value: 'vinyl_crackle', label: '바이닐 크랙클' },
+  { value: 'rainy_ambience', label: '빗소리 앰비언스' },
 ];
 
 export const VOCAL_STYLE_OPTIONS: Array<{ value: VocalStyleOption; label: string }> = [

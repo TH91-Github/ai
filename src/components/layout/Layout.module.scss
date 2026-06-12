@@ -34,7 +34,25 @@
 }
 
 .brandIcon {
-  font-size: 1.3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 8px;
+  color: var(--color-primary);
+  background: var(--color-primary-alpha);
+
+  svg {
+    width: 1.05rem;
+    height: 1.05rem;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 }
 
 .brandName {

@@ -40,7 +40,13 @@ const Layout: React.FC = () => {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <Link to="/" className={styles.brand}>
-            <span className={styles.brandIcon}>🖊</span>
+            <span className={styles.brandIcon} aria-hidden="true">
+              <svg viewBox="0 0 24 24" role="img" focusable="false">
+                <path d="M4 20h4.6L19.3 9.3a2.1 2.1 0 0 0 0-3L17.7 4.7a2.1 2.1 0 0 0-3 0L4 15.4V20Z" />
+                <path d="M13.8 5.6l4.6 4.6" />
+                <path d="M4 20l4.8-1.1" />
+              </svg>
+            </span>
             <span className={styles.brandName}>BlogPrompt<em>Tool</em></span>
           </Link>
           <nav className={styles.primaryNav} aria-label="대분류 메뉴">

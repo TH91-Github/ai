@@ -192,3 +192,44 @@
     cursor: not-allowed;
   }
 }
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.copyStatus {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.resultTextarea {
+  width: 100%;
+  min-height: 460px;
+  padding: 0.9rem 1rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 8px;
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--color-text);
+  background: var(--color-surface-1);
+  resize: vertical;
+  outline: none;
+
+  &::placeholder {
+    color: var(--color-text-disabled);
+  }
+
+  &:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px var(--color-primary-alpha);
+  }
+
+  @media (max-width: 768px) {
+    min-height: 380px;
+  }
+}

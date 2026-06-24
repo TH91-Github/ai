@@ -45,6 +45,10 @@
   }
 }
 
+.layoutSingle {
+  grid-template-columns: minmax(0, 880px);
+}
+
 // ── 폼 영역 ──
 .formSection {
   display: flex;

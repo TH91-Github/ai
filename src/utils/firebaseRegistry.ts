@@ -62,7 +62,6 @@ const toRegistryItem = (id: string, data: DocumentData): RegistryItem | null => 
       keywords: Array.isArray(data.keywords) ? data.keywords.filter((item: unknown) => typeof item === 'string') : [],
       createdAt: toIsoString(data.createdAt),
       updatedAt: toIsoString(data.updatedAt),
-      songData: data.songData,
     };
   }
 

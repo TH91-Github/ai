@@ -36,7 +36,7 @@ const TABS: { key: TabType; label: string; desc: string }[] = [
   {
     key: 'song',
     label: '🎵 노래',
-    desc: 'Suno 프롬프트와 유튜브 제목·설명·태그를 함께 생성합니다',
+    desc: '노래 제목과 가수명을 입력해 ChatGPT 요청 프롬프트를 생성합니다',
   },
   {
     key: 'video',
@@ -58,7 +58,7 @@ const SECTION_META: Record<DraftSection, { title: string; desc: string }> = {
   },
   song: {
     title: '노래 초안 만들기',
-    desc: 'Suno용 스타일 프롬프트와 제작 보조 정보를 생성합니다',
+    desc: '노래제목 - 가수명 형식으로 ChatGPT에게 전달할 요청 프롬프트를 만듭니다',
   },
   video: {
     title: '영상 초안 만들기',
@@ -120,7 +120,7 @@ const DraftPage: React.FC<DraftPageProps> = ({ section = 'blog' }) => {
         </p>
       </div>
 
-      <div className={styles.layout}>
+      <div className={[styles.layout, section === 'song' ? styles.layoutSingle : ''].filter(Boolean).join(' ')}>
         {/* 왼쪽: 폼 영역 */}
         <section className={styles.formSection}>
           {/* 탭 */}
@@ -164,10 +164,7 @@ const DraftPage: React.FC<DraftPageProps> = ({ section = 'blog' }) => {
                 onError={(msg) => showToast(msg, 'error')}
               />
             ) : activeTab === 'song' ? (
-              <SongDraftForm
-                onGenerated={(r) => handleGenerated(r, '노래')}
-                onError={(msg) => showToast(msg, 'error')}
-              />
+              <SongDraftForm onError={(msg) => showToast(msg, 'error')} />
             ) : (
               <VideoDraftForm
                 onGenerated={(r) => handleGenerated(r, '영상')}
@@ -177,27 +174,28 @@ const DraftPage: React.FC<DraftPageProps> = ({ section = 'blog' }) => {
           </div>
         </section>
 
-        {/* 오른쪽: 결과 영역 */}
-        <section className={styles.resultSection} id="prompt-result">
-          {result ? (
-            <>
-              <h2 className={styles.resultTitle}>생성된 프롬프트</h2>
-              <PromptResult
-                result={result}
-                mainTopic={resultMainTopic}
-                type={activeTab as BlogType}
-                onSaved={() => showToast('등록 목록에 저장되었습니다', 'success')}
-                onCopied={() => showToast('클립보드에 복사되었습니다', 'success')}
-                onError={(msg) => showToast(msg, 'error')}
-              />
-            </>
-          ) : (
-            <div className={styles.emptyResult}>
-              <span className={styles.emptyIcon}>✨</span>
-              <p>왼쪽 폼을 작성하고<br />프롬프트를 생성하세요</p>
-            </div>
-          )}
-        </section>
+        {section !== 'song' && (
+          <section className={styles.resultSection} id="prompt-result">
+            {result ? (
+              <>
+                <h2 className={styles.resultTitle}>생성된 프롬프트</h2>
+                <PromptResult
+                  result={result}
+                  mainTopic={resultMainTopic}
+                  type={activeTab as BlogType}
+                  onSaved={() => showToast('등록 목록에 저장되었습니다', 'success')}
+                  onCopied={() => showToast('클립보드에 복사되었습니다', 'success')}
+                  onError={(msg) => showToast(msg, 'error')}
+                />
+              </>
+            ) : (
+              <div className={styles.emptyResult}>
+                <span className={styles.emptyIcon}>✨</span>
+                <p>왼쪽 폼을 작성하고<br />프롬프트를 생성하세요</p>
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </div>
   );

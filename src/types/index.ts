@@ -4,43 +4,6 @@
 // 주의: 이 파일은 런타임 값을 포함하지 않음 (순수 타입만)
 // =============================================================
 
-import type {
-  HookStrength,
-  InstrumentType,
-  LoopMode,
-  LyricDensity,
-  MusicPromptDraft as FeatureSongPromptDraft,
-  MusicPromptFormValues as FeatureSongDraftForm,
-  MusicPromptInput as FeatureSongPromptInput,
-  MusicPromptResult as FeatureSongGeneratedData,
-  MusicPurpose,
-  SongDistributionIntent,
-  SongDurationTarget,
-  SongLanguageOption,
-  SongOutputType,
-  SongVersionType,
-  SongVocalMode,
-  VocalGender,
-} from '@/features/musicPrompt/types';
-export type {
-  HookStrength,
-  InstrumentType,
-  LoopMode,
-  LyricDensity,
-  MusicPurpose,
-  SongDistributionIntent,
-  SongDurationTarget,
-  SongLanguageOption,
-  SongOutputType,
-  SongVersionType,
-  SongVocalMode,
-  VocalGender,
-};
-export type SongPromptDraft = FeatureSongPromptDraft;
-export type SongDraftForm = FeatureSongDraftForm;
-export type SongPromptInput = FeatureSongPromptInput;
-export type SongGeneratedData = FeatureSongGeneratedData;
-
 // ── 블로그 카테고리 타입 ──────────────────────────────────────
 export type BlogType = 'general' | 'history' | 'song' | 'video';
 export type ToneType = 'blog' | 'info';
@@ -102,24 +65,6 @@ export interface HistoryDraftForm {
   includeImage: boolean;
 }
 
-export interface SavedSongPrompt {
-  id: string;
-  type: 'song';
-  createdAt: number;
-  input: SongPromptInput;
-  stylePrompt: string;
-  expandedProductionNotes: string;
-  lyricsAndStructure: string;
-  uniquenessStrategy: string[];
-  draftPrompt: string;
-  refinementPrompt: string;
-  finalSunoPrompt: string;
-  youtubeTitles: string[];
-  youtubeDescription: string;
-  tagRequestPrompt: string;
-  contentIdWarning: string;
-}
-
 export type SongRegistryStatus = 'registered' | 'unregistered';
 
 // ── 영상 프롬프트 입력 폼 ─────────────────────────────────────
@@ -160,7 +105,6 @@ export interface BlogRegistryItem extends BaseRegistryItem {
   mainTopic: string;
   subTopic: string;
   keywords: string[];
-  songData?: SavedSongPrompt;
 }
 
 export interface SongRegistryItem extends BaseRegistryItem {
@@ -185,7 +129,6 @@ export interface GeneratedPrompt {
   subTopic: string;
   keywords: string[];
   includeHtml: boolean; // HTML 파일 다운로드 버튼 표시 여부
-  songData?: SongGeneratedData;
 }
 
 // ── 통계 ─────────────────────────────────────────────────────

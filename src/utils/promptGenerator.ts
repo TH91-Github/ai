@@ -8,12 +8,10 @@ import type {
   BlogRegistryItem,
   GeneralDraftForm,
   HistoryDraftForm,
-  SongDraftForm,
   VideoDraftForm,
   GeneratedPrompt,
 } from '@/types';
 import { getSubTopics } from '@/data/topicPool';
-import { generateMusicPrompt } from '@/features/musicPrompt/utils/generateMusicPrompt';
 
 /** 현재 날짜를 YYYY-MM-DD 형식으로 반환 */
 export const getTodayString = (): string => {
@@ -551,13 +549,6 @@ ${historicalNarrativeStyleGuide}
 `.trim();
 
   return { title, prompt, subTopic, keywords, includeHtml: false };
-};
-
-// ── 노래 프롬프트 생성 ────────────────────────────────────────
-export const generateSongPrompt = (
-  form: SongDraftForm
-): GeneratedPrompt => {
-  return generateMusicPrompt(form);
 };
 
 // ── 영상 프롬프트 생성 ────────────────────────────────────────

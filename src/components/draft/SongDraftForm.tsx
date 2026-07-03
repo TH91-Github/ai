@@ -39,6 +39,7 @@ const buildSongPrompt = (songTitle: string, artistName: string) => `${songTitle}
 * 단, 섹션 표기는 넣지 말고 순수 가사만 작성해줘.
 
 Suno 스타일 프롬프트에 반드시 반영할 공통 금지/선호 조건:
+* Suno 스타일 프롬프트는 1,000자가 넘지 않게 핵심 스타일, 보컬 질감, 편곡 방향만 압축해서 요약해줘.
 * medium length complete song
 * about 3 to 4 minutes
 * concise arrangement

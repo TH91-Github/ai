@@ -30,18 +30,18 @@ const buildSongPrompt = (songTitle: string, artistName: string) => `${songTitle}
 
 가사 기준:
 * 복사하기 쉽게 제목은 가사 블록 안에 넣지 말아줘.
-* 가사는 너무 길게 쓰지 말고 3~4분대에 맞게 작성해줘.
+* 입력한 노래의 스타일과 가사 밀도를 파악해서 약 3분대 완성곡에 어울리는 분량으로 작성해줘.
 * 트로트/트로트 발라드는 약 36~44줄 사이로 작성해줘.
 * 힙합/팝은 곡 스타일에 맞게 2~3분 또는 3~4분 자연스럽게 맞춰줘.
 * 후렴 반복을 과하게 넣지 말아줘.
-* 5분 이상 길어질 만큼 긴 가사는 피하고, 1분대처럼 너무 짧은 가사도 피해야 해.
+* 가사 흐름이 늘어져 긴 곡처럼 느껴지지 않게 하고, 1분대처럼 너무 짧은 가사도 피해야 해.
 * 구조는 보통 verse chorus verse chorus short bridge final chorus 정도로 구성해줘.
 * 단, 섹션 표기는 넣지 말고 순수 가사만 작성해줘.
 
 Suno 스타일 프롬프트에 반드시 반영할 공통 금지/선호 조건:
 * Suno 스타일 프롬프트는 1,000자가 넘지 않게 핵심 스타일, 보컬 질감, 편곡 방향만 압축해서 요약해줘.
 * medium length complete song
-* about 3 to 4 minutes
+* about 3 minutes, medium length complete song
 * concise arrangement
 * short intro
 * vocals start early
@@ -71,7 +71,7 @@ Suno 스타일 프롬프트에 반드시 반영할 공통 금지/선호 조건:
 주의:
 * target duration 3:15 to 3:40, must end before 4 minutes, finish cleanly 같은 너무 강한 시간 제한 문구는 넣지 마.
 * 이런 문구는 Suno에서 2초짜리 비정상 생성이 될 수 있으니 피해야 해.
-* 대신 자연스럽게 medium length complete song, about 3 to 4 minutes, concise arrangement처럼 유도해줘.
+* 대신 자연스럽게 medium length complete song, about 3 minutes, concise arrangement처럼 유도해줘.
 
 보컬 기준:
 * 매번 같은 보컬 문장을 반복하지 말고 곡마다 다르게 작성해줘.
@@ -105,7 +105,7 @@ Suno 스타일 프롬프트에 반드시 반영할 공통 금지/선호 조건:
 * 찢어지는 고음
 * 과한 벨팅
 * 샤우팅
-* 5분 이상 길어지는 구성
+* 노래 스타일과 가사 흐름을 파악하지 못해 불필요하게 길어지는 구성
 * 1분대처럼 너무 짧게 끝나는 구성
 
 출력 형식:
